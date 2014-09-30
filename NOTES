@@ -1,0 +1,21 @@
+Notes on ctronome:
+   - Ctronome trusts timing on the sound card, by bulding and looping audio
+     samples with appropriate length. It *seems* to be accurate enough for
+     general practicing purposes.
+
+   - I assume that the soundcard driver blocks the program if the dsp buffer
+     is full. If it does not, please report me.
+
+   - The format of the program file is not strictly checked, however I do
+     not expect ctronome to segfault on a badly formed program.
+
+   - I do *not* thoroughly check the format of WAV files, only a portion of
+     the header (no. of channels, bits per sample, samplerate).
+
+   - There seem to be systems that do not support mono mode, or at least
+     ctronome is unable to set it up. According to a feedback which is very
+     appreciated, Intel Corp. 82801DB AC'97 Audio Controller (rev 2) with
+     kernel 2.4.26 "Intel ICH (i8xx), SiS 7012, NVidia nForce Audio or AMD
+     768/811x" driver, has this situation. If you experience something like
+     this, use the stereo wavs included.
+

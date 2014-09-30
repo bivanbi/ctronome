@@ -1,0 +1,7 @@
+TODO list:
+
+ - output to WAV file
+ - runtime-adjustable bpm and bpt via keyboard
+ - 'tap-in' bpm via keyboard
+ - adjustable program speed via commandline
+
