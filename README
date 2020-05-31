@@ -47,15 +47,16 @@ INSTALLATION:
 
    There are two one-channel and two two-channel (both channels are the same)
    wav samples included, recorded from a real metronome. You have to install the one that
-   fits your sound system (see NOTES).
+   fits your sound system (see docs/important_notes.txt).
 
    Example compilation and installation into default location:
 	tar xzf ctronome-0.5.6.tar.gz
-	cd ctronome-0.5.6
+	cd ctronome-0.5.6/src/
 	make
 	mkdir /usr/share/ctronome
-	cp *wav /usr/share/ctronome
 	cp ctronome /usr/local/bin
+	cd ../
+	cp assets/*wav /usr/share/ctronome
 
 RUNNING:
  ctronome -b <bpm> -t <bpt> -c <count> -w1 <wav1> -w2 <wav2> -d <dsp_device> \
@@ -72,7 +73,7 @@ RUNNING:
     -h                  display help screen
     -debug              display debug messages
 
-   See prog_example.txt to learn how to program ctronome.
+   See docs/prog_example.txt to learn how to program ctronome.
 
    For BPM you can specify the base note. E.g. 60/4 means:
    60 1/4 notes per minute -> length of 1/4 note is 1 second.
