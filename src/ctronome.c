@@ -35,6 +35,7 @@ dword wav2_samplerate;
 word wav2_bitspersample;
 
 struct dsp_device dsp_device;
+byte dsp_depth;
 
 int bpt_base_specified,bpm_base_specified;
 int i1,i2,i3,i4,i5;

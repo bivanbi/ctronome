@@ -37,7 +37,6 @@ typedef DWORD dword;
 typedef WORD word;
 typedef BYTE byte;
 
-static byte dsp_depth;
 static int count = 1; /* tact counter */
 static int pcount = 1; /* repeat tact/program pcount times then exit 0 = endless */
 static int pdecrease = 0;
