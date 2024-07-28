@@ -1,3 +1,6 @@
+v0.5.7
+   - fix compilation error 'multiple definition of ...'
+
 v0.5.6
    - fixed compile-time warning in dsp.c:
 	dsp.c:51:2: warning: too many arguments for format [-Wformat-extra-args]
