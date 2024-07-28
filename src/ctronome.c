@@ -4,10 +4,9 @@
 #include <string.h>
 #include "ctronome.h"
 #include "routines.h"
+#include "dsp.h"
 
 dword bytes_read;
-
-int dsp_device;
 
 dword dsp_pattern_length;
 
@@ -35,9 +34,14 @@ word wav2_channels;
 dword wav2_samplerate;
 word wav2_bitspersample;
 
+struct dsp_device dsp_device;
+byte dsp_depth;
+
 int bpt_base_specified,bpm_base_specified;
 int i1,i2,i3,i4,i5;
 byte tmp[8219];
+
+byte debug;
 
 int main(int argc,char *argv[]){
  parm_init(argc,argv);
@@ -52,21 +56,21 @@ int main(int argc,char *argv[]){
    if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n",count,bpm[0],bpm[1],bpt[0],bpt[1]);
 
    /* lets calculate the appropriate pattern length for our bpm and bpt */
-   bpm_base_length = dsp_speed * dsp_depth * dsp_channels * 60 / bpm[0];
+   bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
    dsp_pattern_length = bpm_base_length * bpm[1] / bpt[1];
    /* if (debug){
     printf("dsp_speed: >%d<, dsp_depth: >%d<, dsp_channels: >%d<, patt. length: >%d<\n",dsp_speed,dsp_depth,dsp_channels,
                                                                                         dsp_pattern_length);
    } */
 
-   while(i3 = dsp_pattern_length % (dsp_depth * dsp_channels)){
+   while(i3 = dsp_pattern_length % (dsp_depth * dsp_device.number_of_channels)){
     dsp_pattern_length++;
    }
 
    for (c4 = 0;c4 < count;c4++){
-    dsp_write(dsp_device,wav1,dsp_pattern_length);
+    dsp_write(dsp_device.handler,wav1,dsp_pattern_length);
     for (c3 = bpt[0];c3 > 1; c3--){
-     dsp_write(dsp_device,wav2,dsp_pattern_length);
+     dsp_write(dsp_device.handler,wav2,dsp_pattern_length);
     }
    }
    if (!(is_program)) pcount -= pdecrease;
@@ -288,11 +292,12 @@ void parm_init(int argc,char *argv[]){
  dsp_device = dsp_init(dspdev,wav_bitspersample,wav_channels,wav_samplerate);
 
  if (debug)
-  printf("debug: dsp channels: '%d', samplerate: '%d', bits per sample: '%d'\n",dsp_channels,dsp_speed,dsp_format);
+  printf("debug: dsp channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
+         dsp_device.number_of_channels, dsp_device.sample_rate, dsp_device.dsp_format);
 
- dsp_depth = dsp_format / 8;
+ dsp_depth = dsp_device.dsp_format / 8;
 
- wav_bytes_to_read = dsp_depth * dsp_channels * dsp_speed / 2;
+ wav_bytes_to_read = dsp_depth * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
  if (debug) printf("debug: maximum wav bytes to read: '%d'\n",wav_bytes_to_read);
 
  bytes_read = fread(&wav1,1,wav_bytes_to_read,wavfile);

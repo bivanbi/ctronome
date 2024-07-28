@@ -4,7 +4,7 @@ OBJS = ctronome.o dsp.o routines.o
 
 all: ctronome
 
-%.o: %.c ctronome.h routines.h
+%.o: %.c ctronome.h routines.h dsp.h
 	$(CC) -c $<
 
 ctronome: $(OBJS)
