@@ -37,11 +37,7 @@ typedef DWORD dword;
 typedef WORD word;
 typedef BYTE byte;
 
-static word dsp_channels;
-static dword dsp_speed;
-static word dsp_format;
 static byte dsp_depth;
-
 static int count = 1; /* tact counter */
 static int pcount = 1; /* repeat tact/program pcount times then exit 0 = endless */
 static int pdecrease = 0;
@@ -52,7 +48,6 @@ static byte slash = 47; /* the / character */
 static byte hashmark = 35; /* the # character */
 static byte space = 32; /* the   character */
 
-int dsp_init(byte *,word,word,dword);
 void next_program(FILE *); /* process the next line of program */
 void parm_init(int, char *[]);
 void dsp_close(byte);
