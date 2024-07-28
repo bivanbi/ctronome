@@ -13,7 +13,7 @@ static char *dspdev = "/dev/dsp\0";
 /* means: 1/4, 1/8 etc. */
 static int default_base_note = 4;
 
-char *programfile;
+static char *programfile;
 
 #define HELP "usage: ctronome <parameters>\n\
                valid parameters are:\n\
@@ -37,10 +37,10 @@ typedef DWORD dword;
 typedef WORD word;
 typedef BYTE byte;
 
-word dsp_channels;
-dword dsp_speed;
-word dsp_format;
-byte dsp_depth;
+static word dsp_channels;
+static dword dsp_speed;
+static word dsp_format;
+static byte dsp_depth;
 
 static int count = 1; /* tact counter */
 static int pcount = 1; /* repeat tact/program pcount times then exit 0 = endless */
@@ -58,4 +58,4 @@ void parm_init(int, char *[]);
 void dsp_close(byte);
 void dsp_write(byte, byte *, dword);
 
-byte debug;
+static byte debug;
