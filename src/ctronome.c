@@ -40,6 +40,8 @@ int bpt_base_specified,bpm_base_specified;
 int i1,i2,i3,i4,i5;
 byte tmp[8219];
 
+byte debug;
+
 int main(int argc,char *argv[]){
  parm_init(argc,argv);
 

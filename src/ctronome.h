@@ -53,4 +53,4 @@ void parm_init(int, char *[]);
 void dsp_close(byte);
 void dsp_write(byte, byte *, dword);
 
-static byte debug;
+extern byte debug;
