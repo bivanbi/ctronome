@@ -11,11 +11,3 @@ Notes on ctronome:
 
    - I do *not* thoroughly check the format of WAV files, only a portion of
      the header (no. of channels, bits per sample, samplerate).
-
-   - There seem to be systems that do not support mono mode, or at least
-     ctronome is unable to set it up. According to a feedback which is very
-     appreciated, Intel Corp. 82801DB AC'97 Audio Controller (rev 2) with
-     kernel 2.4.26 "Intel ICH (i8xx), SiS 7012, NVidia nForce Audio or AMD
-     768/811x" driver, has this situation. If you experience something like
-     this, use the stereo wavs included.
-
