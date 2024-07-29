@@ -48,7 +48,7 @@ put in the place you specified in [ctronome.h](src/ctronome.h), or specified on 
 
 There are [two sets of wav samples](assets) included, recorded from a real metronome;
 one for mono and one stereo output. You have to install the one that fits your sound
-system (see docs/important_notes.txt).
+system (see [important notes](docs/important_notes.md)).
 
 ### Example compilation and installation into default location
 ```bash
