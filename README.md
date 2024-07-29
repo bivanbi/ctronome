@@ -28,9 +28,9 @@ files installed (they come with the Linux kernel source), and OSS
 ### Compile-time Configuration
 Edit [ctronome.h](src/ctronome.h) for defaults, the most important ones are:
    ```c
-   metronomewav1 = "/usr/share/ctronome/metronome1.wav\0";
-   metronomewav2 = "/usr/share/ctronome/metronome2.wav\0";
-   dspdev = "/dev/dsp\0";
+   static char *metronomewav1 = "/usr/share/ctronome/metronome1.wav\0";
+   static char *metronomewav2 = "/usr/share/ctronome/metronome2.wav\0";
+   static char *dspdev = "/dev/dsp\0";
    ```
  
 ### Build Binaries
