@@ -28,7 +28,7 @@ static char *programfile;
                 -v                  print version\n\
                 -debug              verbose output\n\
            e.g: ctronome -b 60 -t 4\n\
-           for defaults/limits and required WAV format see README\n"
+           for defaults/limits and required WAV format see README.md\n"
 
 /* my lazy type definitions */
 typedef uint32_t DWORD;
