@@ -26,6 +26,7 @@ static char *programfile;
                 -d <device>         dsp device\n\
                 -h                  display this help screen\n\
                 -v                  print version\n\
+                -debug              verbose output\n\
            e.g: ctronome -b 60 -t 4\n\
            for defaults/limits and required WAV format see README\n"
 
