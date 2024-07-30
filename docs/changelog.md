@@ -6,6 +6,7 @@
 - Update documentation to Markdown format
 - Fix various grammar issues in documentation / help text etc.
 - Fix version numbering
+- Exit after displaying version number with `-v` option
 
 ## v0.5.6
 - fixed compile-time warning in dsp.c:
