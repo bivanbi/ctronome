@@ -27,7 +27,7 @@ dword get_next_line(byte *buffer, FILE *filehandle, dword max) {
     return (length);
 }
 
-FILE *openread(byte *filename) {
+FILE *open_file_for_reading(byte *filename) {
     FILE *filehandle;
 
     if (!(filehandle = fopen(filename, "rb"))) {

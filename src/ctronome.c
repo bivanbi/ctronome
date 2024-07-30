@@ -275,7 +275,7 @@ void parm_init(int argc, char *argv[]) {
     }
 
     /* open wav file 1 */
-    wavfile = openread(metronomewav1);
+    wavfile = open_file_for_reading(metronomewav1);
 
     /* read the header first */
     bytes_read = fread(&wav_header, 1, 44, wavfile);
@@ -315,7 +315,7 @@ void parm_init(int argc, char *argv[]) {
     fclose(wavfile);
 
     /* open wav file 2 */
-    wavfile = openread(metronomewav2);
+    wavfile = open_file_for_reading(metronomewav2);
 
     /* read the header first */
     bytes_read = fread(&wav_header, 1, 44, wavfile);
@@ -351,7 +351,7 @@ void parm_init(int argc, char *argv[]) {
     fclose(wavfile);
 
     /* open program file */
-    if (is_program) program = openread(programfile);
+    if (is_program) program = open_file_for_reading(programfile);
 
     printf("bpm: %d/%d, bpt: %d/%d", bpm[0], bpm[1], bpt[0], bpt[1]);
     if (pdecrease) printf(", repeat count: %d", pcount);
