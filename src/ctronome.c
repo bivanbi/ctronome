@@ -58,10 +58,6 @@ int main(int argc, char *argv[]) {
             /* lets calculate the appropriate pattern length for our bpm and bpt */
             bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
             dsp_pattern_length = bpm_base_length * bpm[1] / bpt[1];
-            /* if (debug){
-             printf("dsp_speed: >%d<, dsp_depth: >%d<, dsp_channels: >%d<, patt. length: >%d<\n",
-                    dsp_speed, dsp_depth, dsp_channels, dsp_pattern_length);
-            } */
 
             while (i3 = dsp_pattern_length % (dsp_depth * dsp_device.number_of_channels)) {
                 dsp_pattern_length++;
