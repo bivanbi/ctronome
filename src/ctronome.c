@@ -333,17 +333,17 @@ void parm_init(int argc, char *argv[]) {
     wav2_bitspersample = *(word *) &wav_header[34];
 
     if (debug)
-        printf("debug: wav2 channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
+        printf("debug: wav2 channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
                wav2_channels, wav2_samplerate, wav2_bitspersample);
 
     if ((wav_channels != wav2_channels) ||
         (wav_bitspersample != wav2_bitspersample)) {
-        printf("the two WAV files must have the same number of channels and same samplerate\n");
+        printf("the two WAV files must have the same number of channels and bits per sample\n");
         exit(1);
     }
 
     if ((debug) && (wav_samplerate != wav2_samplerate)) {
-        printf("debug: wav1 and wav2 samplerate differs, may sound funny\n");
+        printf("debug: wav1 and wav2 sample rate differs, may sound funny\n");
     }
 
     bytes_read = fread(&wav2, 1, wav_bytes_to_read, wavfile);
@@ -354,7 +354,7 @@ void parm_init(int argc, char *argv[]) {
     }
     fclose(wavfile);
 
-    /* open wav file 2 */
+    /* open program file */
     if (is_program) program = openread(programfile);
 
     printf("bpm: %d/%d, bpt: %d/%d", bpm[0], bpm[1], bpt[0], bpt[1]);
