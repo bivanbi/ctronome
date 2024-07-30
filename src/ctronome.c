@@ -11,8 +11,8 @@ dword bytes_read;
 dword dsp_pattern_length;
 
 /* the two wav files */
-byte wav1[1000000];
-byte wav2[1000000];
+byte wav1[1000000]; // played at first beat of tact; usually the accented beat
+byte wav2[1000000]; // played at the other beats of tact
 
 dword wav_bytes_to_read;
 

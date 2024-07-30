@@ -23,7 +23,7 @@ Valid parameters are:\n\
     -t <bpt>            beat per tact\n\
     -p <filename>       program file\n\
     -c <count>          play tact/program <count> times then exit\n\
-    -w1 <filename>      wav to use for first beat of tact\n\
+    -w1 <filename>      wav to use for first (accented) beat of tact\n\
     -w2 <filename>      wav to use for other beat of tact\n\
     -d <device>         dsp device\n\
     -h                  display this help screen\n\
