@@ -361,7 +361,7 @@ void parm_init(int argc, char *argv[]) {
     if (is_program) program = openread(programfile);
 
     printf("bpm: %d/%d, bpt: %d/%d", bpm[0], bpm[1], bpt[0], bpt[1]);
-    if (pdecrease) printf("repeat count: %d", pcount);
+    if (pdecrease) printf(", repeat count: %d", pcount);
     if (is_program) printf("\nprogram file: %s", programfile);
     printf("\n");
 }
