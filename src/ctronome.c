@@ -183,7 +183,7 @@ void parm_init(int argc,char *argv[]){
       (strcmp(argv[i], "--v") == 0) ||
       (strcmp(argv[i], "-version") == 0) ||
       (strcmp(argv[i], "--version") == 0)) {
-   printf("%s v%s\n%s",MYNAME,VERSION,CREDITS);
+   printf("%s %s\n%s",MYNAME,VERSION,CREDITS);
   }
 
   /* wav1 */

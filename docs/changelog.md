@@ -5,6 +5,7 @@
 - Add Ubuntu 22.04 padsp issue and workaround to documentation
 - Update documentation to Markdown format
 - Fix various grammar issues in documentation / help text etc.
+- Fix version numbering
 
 ## v0.5.6
 - fixed compile-time warning in dsp.c:
