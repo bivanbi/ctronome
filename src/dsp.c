@@ -31,13 +31,13 @@ struct dsp_device dsp_init(byte *dsp_dev, word bitspersample, word channels, dwo
  }
  if (debug) printf("debug: dsp.c: wanted AFMT: >%d<\n", dsp_device.dsp_format);
 
- if ((channels < 1) && (channels > 2)){
+ if ((channels < 1) || (channels > 2)){
   printf ("FATAL: number of channels must be 1 (mono) or 2 (stereo) (got: %d\n",channels);
   exit (1);
  }
  dsp_device.number_of_channels = channels;
 
- if ((samplerate < 8000) && (samplerate > 96000)){
+ if ((samplerate < 8000) || (samplerate > 96000)){
   printf ("FATAL: samplerate must be between 8000 and 96000 (got: %d\n",samplerate);
   exit (1);
  }

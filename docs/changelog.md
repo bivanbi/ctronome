@@ -11,6 +11,7 @@
 - Exit after displaying version number
 - Do not display homepage with version number, only version number
 - Update help text for readability and add home page
+- Fix logical expressions in [dsp.c](../src/dsp.c) always evaluating to false
 
 ## v0.5.6
 - fixed compile-time warning in dsp.c:
