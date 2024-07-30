@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
             if (!(is_program)) pcount -= pdecrease;
         }
     }
-    dsp_close;
+    dsp_close(dsp_device.handler);
     return (0);
 }
 
