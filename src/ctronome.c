@@ -10,9 +10,14 @@ dword bytes_read;
 
 dword dsp_pattern_length;
 
-/* the two wav files */
-byte wav1[1000000]; // played at first beat of tact; usually the accented beat
-byte wav2[1000000]; // played at the other beats of tact
+struct wav_data {
+    byte data[1000000];
+    word number_of_channels;
+    dword sample_rate;
+    word bits_per_sample;
+};
+
+struct wav_data wav1, wav2;
 
 dword wav_bytes_to_read;
 
@@ -26,13 +31,6 @@ byte is_program;
 dword bpm_base_length;
 
 dword c1, c2, c3, c4, lo;
-
-word wav_channels;
-dword wav_samplerate;
-word wav_bitspersample;
-word wav2_channels;
-dword wav2_samplerate;
-word wav2_bitspersample;
 
 struct dsp_device dsp_device;
 byte dsp_depth;
@@ -64,9 +62,9 @@ int main(int argc, char *argv[]) {
             }
 
             for (c4 = 0; c4 < count; c4++) {
-                dsp_write(dsp_device.handler, wav1, dsp_pattern_length);
+                dsp_write(dsp_device.handler, wav1.data, dsp_pattern_length);
                 for (c3 = bpt[0]; c3 > 1; c3--) {
-                    dsp_write(dsp_device.handler, wav2, dsp_pattern_length);
+                    dsp_write(dsp_device.handler, wav2.data, dsp_pattern_length);
                 }
             }
             if (!(is_program)) pcount -= pdecrease;
@@ -270,8 +268,8 @@ void parm_init(int argc, char *argv[]) {
 
     /* cleanup buffers */
     for (c1 = 0; c1 < 1000000; c1++) {
-        wav1[c1] = 0;
-        wav2[c1] = 0;
+        wav1.data[c1] = 0;
+        wav2.data[c1] = 0;
     }
 
     /* open wav file 1 */
@@ -284,17 +282,17 @@ void parm_init(int argc, char *argv[]) {
         exit(1);
     }
 
-    wav_channels = *(word *) &wav_header[22];
-    wav_samplerate = *(dword *) &wav_header[24];
-    wav_bitspersample = *(word *) &wav_header[34];
+    wav1.number_of_channels = *(word *) &wav_header[22];
+    wav1.sample_rate = *(dword *) &wav_header[24];
+    wav1.bits_per_sample = *(word *) &wav_header[34];
 
     if (debug)
-        printf("debug: wav channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
-               wav_channels, wav_samplerate, wav_bitspersample);
+        printf("debug: wav1 channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
+               wav1.number_of_channels, wav1.sample_rate, wav1.bits_per_sample);
 
     if (debug) printf("debug: calling dsp_init(%s)\n", dsp_device_path);
 
-    dsp_device = dsp_init(dsp_device_path, wav_bitspersample, wav_channels, wav_samplerate);
+    dsp_device = dsp_init(dsp_device_path, wav1.bits_per_sample, wav1.number_of_channels, wav1.sample_rate);
 
     if (debug)
         printf("debug: dsp channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
@@ -305,7 +303,7 @@ void parm_init(int argc, char *argv[]) {
     wav_bytes_to_read = dsp_depth * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
     if (debug) printf("debug: maximum wav bytes to read: '%d'\n", wav_bytes_to_read);
 
-    bytes_read = fread(&wav1, 1, wav_bytes_to_read, wavfile);
+    bytes_read = fread(&wav1.data, 1, wav_bytes_to_read, wavfile);
     if (debug) printf("debug: wav1 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
         printf("wav file %s too short\n", metronomewav1);
@@ -324,25 +322,25 @@ void parm_init(int argc, char *argv[]) {
         exit(1);
     }
 
-    wav2_channels = *(word *) &wav_header[22];
-    wav2_samplerate = *(dword *) &wav_header[24];
-    wav2_bitspersample = *(word *) &wav_header[34];
+    wav2.number_of_channels = *(word *) &wav_header[22];
+    wav2.sample_rate = *(dword *) &wav_header[24];
+    wav2.bits_per_sample = *(word *) &wav_header[34];
 
     if (debug)
         printf("debug: wav2 channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
-               wav2_channels, wav2_samplerate, wav2_bitspersample);
+               wav2.number_of_channels, wav2.sample_rate, wav2.bits_per_sample);
 
-    if ((wav_channels != wav2_channels) ||
-        (wav_bitspersample != wav2_bitspersample)) {
+    if ((wav1.number_of_channels != wav2.number_of_channels) ||
+        (wav1.bits_per_sample != wav2.bits_per_sample)) {
         printf("the two WAV files must have the same number of channels and bits per sample\n");
         exit(1);
     }
 
-    if ((debug) && (wav_samplerate != wav2_samplerate)) {
+    if ((debug) && (wav1.sample_rate != wav2.sample_rate)) {
         printf("debug: wav1 and wav2 sample rate differs, may sound funny\n");
     }
 
-    bytes_read = fread(&wav2, 1, wav_bytes_to_read, wavfile);
+    bytes_read = fread(&wav2.data, 1, wav_bytes_to_read, wavfile);
     if (debug) printf("debug: wav2 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
         printf("wav file %s too short\n", metronomewav2);
