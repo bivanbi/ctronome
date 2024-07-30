@@ -83,7 +83,7 @@ void next_program(FILE *programfile) {
     /* a normal line should be at least 5 characters long + newline */
     lo2 = 0;
     while (lo2 >= 0) {
-        while ((lo1 = getnextline(temp, programfile, 8192)) < 6) {
+        while ((lo1 = get_next_line(temp, programfile, 8192)) < 6) {
             /* if 0 character has been read, seek to the beginning of the file */
             if (lo1 < 1) {
                 fseek(programfile, SEEK_SET, 0);

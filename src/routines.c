@@ -10,7 +10,7 @@ int str_search(byte *buffer, byte search) {
     return (-1);
 }
 
-dword getnextline(byte *buffer, FILE *filehandle, dword max) {
+dword get_next_line(byte *buffer, FILE *filehandle, dword max) {
     dword length;
     length = 0;
 
