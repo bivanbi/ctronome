@@ -13,4 +13,3 @@ ctronome: $(OBJS)
 
 clean:
 	rm -f *.o ctronome
-

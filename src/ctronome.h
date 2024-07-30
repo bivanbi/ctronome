@@ -49,15 +49,17 @@ static int count = 1; /* tact counter */
 static int pcount = 1; /* repeat tact/program pcount times then exit 0 = endless */
 static int pdecrease = 0;
 
-static int bpm[2] = {60,4}; /* 60 bpm is given for 1/4 notes */
-static int bpt[2] = {1,4}; /* beat per tact */
+static int bpm[2] = {60, 4}; /* 60 bpm is given for 1/4 notes */
+static int bpt[2] = {1, 4}; /* beat per tact */
 static byte slash = 47; /* the / character */
 static byte hashmark = 35; /* the # character */
 static byte space = 32; /* the   character */
 
 void next_program(FILE *); /* process the next line of program */
 void parm_init(int, char *[]);
+
 void dsp_close(byte);
+
 void dsp_write(byte, byte *, dword);
 
 extern byte debug;
