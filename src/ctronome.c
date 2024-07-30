@@ -200,8 +200,8 @@ void parm_init(int argc, char *argv[]) {
 
         /* dsp device */
         if ((strcmp(argv[i], "-d") == 0) && (i + 1 < argc)) {
-            dspdev = argv[++i];
-            if (debug) printf("debug: dsp: '%s'\n", dspdev);
+            dsp_device_path = argv[++i];
+            if (debug) printf("debug: dsp: '%s'\n", dsp_device_path);
         }
 
         /* bpt */
@@ -292,9 +292,9 @@ void parm_init(int argc, char *argv[]) {
         printf("debug: wav channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
                wav_channels, wav_samplerate, wav_bitspersample);
 
-    if (debug) printf("debug: calling dsp_init(%s)\n", dspdev);
+    if (debug) printf("debug: calling dsp_init(%s)\n", dsp_device_path);
 
-    dsp_device = dsp_init(dspdev, wav_bitspersample, wav_channels, wav_samplerate);
+    dsp_device = dsp_init(dsp_device_path, wav_bitspersample, wav_channels, wav_samplerate);
 
     if (debug)
         printf("debug: dsp channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
