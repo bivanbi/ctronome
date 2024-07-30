@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         if (pcount > 0) {
             if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", count, bpm[0], bpm[1], bpt[0], bpt[1]);
 
-            /* lets calculate the appropriate pattern length for our bpm and bpt */
+            /* calculate the appropriate pattern length for bpm and bpt */
             bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
             dsp_pattern_length = bpm_base_length * bpm[1] / bpt[1];
 
