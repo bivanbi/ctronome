@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 void next_program(FILE *programfile) {
     byte temp[8192];
     dword lo1;
-    int lo2, lo3, lo4;
+    int lo2, lo3;
     /* a normal line should be at least 5 characters long + newline */
     lo2 = 0;
     while (lo2 >= 0) {
@@ -345,9 +345,6 @@ void parm_init(int argc, char *argv[]) {
     if ((debug) && (wav_samplerate != wav2_samplerate)) {
         printf("debug: wav1 and wav2 samplerate differs, may sound funny\n");
     }
-
-    /* skip the wav header */
-    /* fseek(wavfile,44,SEEK_SET); */
 
     bytes_read = fread(&wav2, 1, wav_bytes_to_read, wavfile);
     if (debug) printf("debug: wav2 bytes read: '%d'\n", bytes_read);

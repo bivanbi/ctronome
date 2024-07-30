@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <syslog.h>
-#include <unistd.h>
 #include "ctronome.h"
 #include "routines.h"
 
@@ -49,7 +47,6 @@ byte str_compare(byte *a, byte *b, byte delimiter) {
 }
 
 int str_search(byte *buffer, byte search) {
-    dword count = 0;
     dword i = 0;
     while ((buffer[i] != 0) && (buffer[i++] != search));
     if (buffer[--i] == search) return (i);
