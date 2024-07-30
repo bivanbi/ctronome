@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #define MYNAME "ctronome"
-#define CREDITS "homepage: http://ctronome.kign.org/\n"
+#define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
 
 /* set up these three variables to your system */
 static char *metronomewav1 = "/usr/share/ctronome/metronome1.wav\0";
@@ -15,19 +15,27 @@ static int default_base_note = 4;
 static char *programfile;
 
 #define HELP "usage: ctronome <parameters>\n\
-               valid parameters are:\n\
-                -b <bpm>            beat per minute\n\
-                -t <bpt>            beat per tact\n\
-                -p <filename>       program file\n\
-                -c <count>          play tact/program <count> times then exit\n\
-                -w1 <filename>      wav to use for first beat of tact\n\
-                -w2 <filename>      wav to use for other beat of tact\n\
-                -d <device>         dsp device\n\
-                -h                  display this help screen\n\
-                -v                  print version\n\
-                -debug              verbose output\n\
-           e.g: ctronome -b 60 -t 4\n\
-           for defaults/limits and required WAV format see README.md\n"
+Play metronome sound at desired speed through sound card\n\
+Complex rhytmic patterns can be achieved by using a program file.\n\
+\n\
+Valid parameters are:\n\
+    -b <bpm>            beat per minute\n\
+    -t <bpt>            beat per tact\n\
+    -p <filename>       program file\n\
+    -c <count>          play tact/program <count> times then exit\n\
+    -w1 <filename>      wav to use for first beat of tact\n\
+    -w2 <filename>      wav to use for other beat of tact\n\
+    -d <device>         dsp device\n\
+    -h                  display this help screen\n\
+    -v                  print version\n\
+    -debug              verbose output\n\
+\n\
+Example: ctronome -b 60 -t 4\n\
+\n\
+For defaults/limits and required WAV format see README.md\n\
+For example program file see docs/prog_example.txt\n\
+\n\
+Home page: " HOMEPAGE "\n"
 
 /* my lazy type definitions */
 typedef uint32_t DWORD;

@@ -7,6 +7,10 @@
 - Fix various grammar issues in documentation / help text etc.
 - Fix version numbering
 - Exit after displaying version number with `-v` option
+- Update home page URL to point to GitHub repository
+- Exit after displaying version number
+- Do not display homepage with version number, only version number
+- Update help text for readability and add home page
 
 ## v0.5.6
 - fixed compile-time warning in dsp.c:
