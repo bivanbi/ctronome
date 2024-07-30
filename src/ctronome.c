@@ -178,12 +178,12 @@ void parm_init(int argc,char *argv[]){
    exit(0);
   }
 
-  /* version and credits */
+  /* version */
   if ((strcmp(argv[i], "-v") == 0) ||
       (strcmp(argv[i], "--v") == 0) ||
       (strcmp(argv[i], "-version") == 0) ||
       (strcmp(argv[i], "--version") == 0)) {
-   printf("%s %s\n%s",MYNAME,VERSION,CREDITS);
+   printf("%s %s\n",MYNAME,VERSION);
    exit(0);
   }
 
