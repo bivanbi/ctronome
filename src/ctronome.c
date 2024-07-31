@@ -35,7 +35,7 @@ int bpt_base_specified, bpm_base_specified;
 byte debug;
 
 int main(int argc, char *argv[]) {
-    parm_init(argc, argv);
+    parse_command_line_arguments(argc, argv);
 
     /* create an endless or pcount times loop */
     while (pcount > 0) {
@@ -150,7 +150,7 @@ void next_program(FILE *programfile) {
     if (bpm[1] < 1) bpm[1] = 1;
 }
 
-void parm_init(int argc, char *argv[]) {
+void parse_command_line_arguments(int argc, char *argv[]) {
 
     /* first, get the parameters */
     int current_argument, slash_position;

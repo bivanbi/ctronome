@@ -55,7 +55,7 @@ static byte hashmark = 35; /* the # character */
 static byte space = 32; /* the   character */
 
 void next_program(FILE *); /* process the next line of program */
-void parm_init(int, char *[]);
+void parse_command_line_arguments(int, char *[]);
 
 void dsp_close(byte);
 
