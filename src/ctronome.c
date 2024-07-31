@@ -40,7 +40,7 @@ byte debug;
 int main(int argc, char *argv[]) {
     parm_init(argc, argv);
 
-    /* create an endless/pcount times loop */
+    /* create an endless or pcount times loop */
     while (pcount > 0) {
         if (is_program) {
             next_program(program);
@@ -70,6 +70,11 @@ int main(int argc, char *argv[]) {
     return (0);
 }
 
+/**
+ * Process the next line of the program file; restart from beginning if reached the end.
+ *
+ * @param programfile the file handle to the program file
+ */
 void next_program(FILE *programfile) {
     byte program_read_buffer[8192];
     dword number_of_bytes_read;

@@ -45,7 +45,7 @@ typedef DWORD dword;
 typedef WORD word;
 typedef BYTE byte;
 
-static int pcount = 1; /* repeat tact/program pcount times then exit 0 = endless */
+static int pcount = 1; /* repeat tact/program pcount times then exit; 0 means repeat infinite times */
 static int pdecrease = 0;
 
 static int bpm[2] = {60, 4}; /* 60 bpm is given for 1/4 notes */
