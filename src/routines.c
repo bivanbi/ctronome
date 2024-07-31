@@ -10,14 +10,14 @@
  * @param needle the value to look for
  * @return First position of the value in the buffer if found, else -1.
  */
-int search_byte_in_buffer(byte *haystack, byte needle) {
+int search_character_in_buffer(char *haystack, char needle) {
     dword position = 0;
     while ((haystack[position] != 0) && (haystack[position++] != needle));
     if (haystack[--position] == needle) return (position);
     return (-1);
 }
 
-dword get_next_line(byte *buffer, FILE *filehandle, dword max) {
+dword get_next_line(char *buffer, FILE *filehandle, dword max) {
     dword length;
     length = 0;
 
@@ -34,7 +34,7 @@ dword get_next_line(byte *buffer, FILE *filehandle, dword max) {
     return (length);
 }
 
-FILE *open_file_for_reading(byte *filename) {
+FILE *open_file_for_reading(char *filename) {
     FILE *filehandle;
 
     if (!(filehandle = fopen(filename, "rb"))) {

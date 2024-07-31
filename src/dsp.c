@@ -12,7 +12,7 @@ static int dsp_16bit_signed_format = AFMT_S16_LE; /* 0x00000010 signed 16 bit li
 
 static int supported_dsp_formats;
 
-struct dsp_device dsp_init(byte *dsp_dev, word bitspersample, word channels, dword samplerate) {
+struct dsp_device dsp_init(char *dsp_dev, word bitspersample, word channels, dword samplerate) {
     struct dsp_device dsp_device;
 
     dsp_device.dsp_format = 0;

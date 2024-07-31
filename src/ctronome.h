@@ -50,9 +50,9 @@ static int pdecrease = 0;
 
 static int bpm[2] = {60, 4}; /* 60 bpm is given for 1/4 notes */
 static int bpt[2] = {1, 4}; /* beat per tact */
-static byte slash = 47; /* the / character */
-static byte hashmark = 35; /* the # character */
-static byte space = 32; /* the   character */
+static char slash = 47; /* the / character */
+static char hashmark = 35; /* the # character */
+static char space = 32; /* the   character */
 
 void next_program(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);

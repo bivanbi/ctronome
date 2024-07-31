@@ -8,7 +8,7 @@ struct dsp_device {
     int dsp_format;
 };
 
-struct dsp_device dsp_init(byte *, word, word, dword);
+struct dsp_device dsp_init(char *, word, word, dword);
 
 void dsp_close(byte);
 

@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
  * @param programfile the file handle to the program file
  */
 void next_program(FILE *programfile) {
-    byte program_read_buffer[8192];
+    char program_read_buffer[8192];
     dword number_of_bytes_read;
     int position_in_current_line;
     int hashmark_position = 0;
@@ -91,18 +91,18 @@ void next_program(FILE *programfile) {
                 if (pcount) printf("repeat\n");
             }
         }
-        hashmark_position = search_byte_in_buffer(program_read_buffer, hashmark);
+        hashmark_position = search_character_in_buffer(program_read_buffer, hashmark);
     }
     // read number of repetitions for the tact described in current line
     tact_repetition_count = atoi(program_read_buffer);
 
-    position_in_current_line = search_byte_in_buffer(program_read_buffer, space);
+    position_in_current_line = search_character_in_buffer(program_read_buffer, space);
     position_in_current_line++;
-    position_in_current_line += search_byte_in_buffer(&program_read_buffer[position_in_current_line], space);
+    position_in_current_line += search_character_in_buffer(&program_read_buffer[position_in_current_line], space);
     bpm_base_specified = bpt_base_specified = 0;
 
     if (position_in_current_line) {
-        slash_position = search_byte_in_buffer(&program_read_buffer[++position_in_current_line], slash);
+        slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
         bpt[0] = atoi(&program_read_buffer[position_in_current_line]);
 
         if (slash_position >= 0) {
@@ -111,9 +111,9 @@ void next_program(FILE *programfile) {
         }
     }
 
-    position_in_current_line = search_byte_in_buffer(program_read_buffer, space);
+    position_in_current_line = search_character_in_buffer(program_read_buffer, space);
     if (position_in_current_line) {
-        slash_position = search_byte_in_buffer(&program_read_buffer[++position_in_current_line], slash);
+        slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
         bpm[0] = atoi(&program_read_buffer[position_in_current_line]);
         if (debug) printf("debug: prg: bpm0: '%d', lo3: '%d'\n", bpm[0], slash_position);
         if (slash_position >= 0) {
@@ -208,7 +208,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
 
         /* bpt */
         if ((strcmp(argv[current_argument], "-t") == 0) && (current_argument + 1 < argc)) {
-            slash_position = search_byte_in_buffer(argv[++current_argument], slash);
+            slash_position = search_character_in_buffer(argv[++current_argument], slash);
             bpt[0] = atoi(argv[current_argument]);
             if (slash_position >= 0) {
                 bpt[1] = atoi(argv[current_argument] + ++slash_position);
@@ -219,7 +219,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
 
         /* bpm */
         if ((strcmp(argv[current_argument], "-b") == 0) && (current_argument + 1 < argc)) {
-            slash_position = search_byte_in_buffer(argv[++current_argument], slash);
+            slash_position = search_character_in_buffer(argv[++current_argument], slash);
             bpm[0] = atoi(argv[current_argument]);
             if (slash_position >= 0) {
                 bpm[1] = atoi(argv[current_argument] + ++slash_position);
