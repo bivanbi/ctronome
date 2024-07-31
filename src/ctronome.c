@@ -21,7 +21,7 @@ dword wav_bytes_to_read;
 
 byte wav_header[100];
 
-FILE *wavfile, *program;
+FILE *program;
 
 byte is_program;
 dword bpm_base_length;
@@ -156,6 +156,7 @@ void parm_init(int argc, char *argv[]) {
     /* first, get the parameters */
     int i;
     dword bytes_read;
+    FILE *wav_file;
 
     debug = 0;
     bpm_base_specified = bpt_base_specified = 0;
@@ -277,10 +278,10 @@ void parm_init(int argc, char *argv[]) {
     }
 
     /* open wav file 1 */
-    wavfile = open_file_for_reading(wav1_file_path);
+    wav_file = open_file_for_reading(wav1_file_path);
 
     /* read the header first */
-    bytes_read = fread(&wav_header, 1, 44, wavfile);
+    bytes_read = fread(&wav_header, 1, 44, wav_file);
     if (bytes_read < 44) {
         printf("wav file %s too short\n", wav1_file_path);
         exit(1);
@@ -307,20 +308,20 @@ void parm_init(int argc, char *argv[]) {
     wav_bytes_to_read = dsp_depth * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
     if (debug) printf("debug: maximum wav bytes to read: '%d'\n", wav_bytes_to_read);
 
-    bytes_read = fread(&wav1.data, 1, wav_bytes_to_read, wavfile);
+    bytes_read = fread(&wav1.data, 1, wav_bytes_to_read, wav_file);
     if (debug) printf("debug: wav1 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
         printf("wav file %s too short\n", wav1_file_path);
         exit(1);
     }
 
-    fclose(wavfile);
+    fclose(wav_file);
 
     /* open wav file 2 */
-    wavfile = open_file_for_reading(wav2_file_path);
+    wav_file = open_file_for_reading(wav2_file_path);
 
     /* read the header first */
-    bytes_read = fread(&wav_header, 1, 44, wavfile);
+    bytes_read = fread(&wav_header, 1, 44, wav_file);
     if (bytes_read < 44) {
         printf("wav file %s too short\n", wav2_file_path);
         exit(1);
@@ -344,13 +345,13 @@ void parm_init(int argc, char *argv[]) {
         printf("debug: wav1 and wav2 sample rate differs, may sound funny\n");
     }
 
-    bytes_read = fread(&wav2.data, 1, wav_bytes_to_read, wavfile);
+    bytes_read = fread(&wav2.data, 1, wav_bytes_to_read, wav_file);
     if (debug) printf("debug: wav2 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
         printf("wav file %s too short\n", wav2_file_path);
         exit(1);
     }
-    fclose(wavfile);
+    fclose(wav_file);
 
     /* open program file */
     if (is_program) program = open_file_for_reading(programfile);
