@@ -5,6 +5,7 @@
 #include "ctronome.h"
 #include "routines.h"
 #include "dsp.h"
+#include "defaults.h"
 
 dword dsp_pattern_length;
 
@@ -21,7 +22,13 @@ dword wav_bytes_to_read;
 
 byte wav_header[100];
 
+char *wav1_file_path;
+char *wav2_file_path;
+char *dsp_device_path;
+
 FILE *program;
+int bpm[2];
+int bpt[2];
 
 byte is_program;
 dword bpm_base_length;
@@ -35,6 +42,7 @@ int bpt_base_specified, bpm_base_specified;
 byte debug;
 
 int main(int argc, char *argv[]) {
+    set_default_values();
     parse_command_line_arguments(argc, argv);
 
     /* create an endless or pcount times loop */
@@ -65,6 +73,15 @@ int main(int argc, char *argv[]) {
     }
     dsp_close(dsp_device.handler);
     return (0);
+}
+
+void set_default_values() {
+    wav1_file_path = (char *) default_wav1_file_path;
+    wav2_file_path = (char *) default_wav2_file_path;
+    dsp_device_path = (char *) default_dsp_device_path;
+
+    memcpy(&bpm, &default_bpm, sizeof (default_bpm));
+    memcpy(&bpt, &default_bpt, sizeof (default_bpt));
 }
 
 /**

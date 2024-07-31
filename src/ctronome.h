@@ -1,16 +1,10 @@
 #include <sys/soundcard.h>
 #include <stdint.h>
+#include "defaults.h"
 
 #define MYNAME "ctronome"
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
 
-/* set up these three variables to your system */
-static char *wav1_file_path = "/usr/share/ctronome/metronome1.wav\0";
-static char *wav2_file_path = "/usr/share/ctronome/metronome2.wav\0";
-static char *dsp_device_path = "/dev/dsp\0";
-
-/* means: 1/4, 1/8 etc. */
-static int default_base_note = 4;
 
 static char *programfile;
 
@@ -48,11 +42,11 @@ typedef BYTE byte;
 static int pcount = 1; /* repeat tact/program pcount times then exit; 0 means repeat infinite times */
 static int pdecrease = 0;
 
-static int bpm[2] = {60, 4}; /* 60 bpm is given for 1/4 notes */
-static int bpt[2] = {1, 4}; /* beat per tact */
-static char slash = 47; /* the / character */
-static char hashmark = 35; /* the # character */
-static char space = 32; /* the   character */
+static const char slash = 47; /* the / character */
+static const char hashmark = 35; /* the # character */
+static const char space = 32; /* the   character */
+
+void set_default_values();
 
 void next_program(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);
