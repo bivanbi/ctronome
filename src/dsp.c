@@ -10,7 +10,7 @@
 static int dsp_8bit_unsigned_format = AFMT_U8; /* 0x00000008 unsigned 8 bit*/
 static int dsp_16bit_signed_format = AFMT_S16_LE; /* 0x00000010 signed 16 bit little endianess*/
 
-static int debug_dsp_speed, debug_dsp_channels, debug_dsp_depth, supported_dsp_formats;
+static int supported_dsp_formats;
 
 struct dsp_device dsp_init(byte *dsp_dev, word bitspersample, word channels, dword samplerate) {
     struct dsp_device dsp_device;
