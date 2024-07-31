@@ -7,8 +7,8 @@
 #include "ctronome.h"
 #include "dsp.h"
 
-static int dsp_8bit_unsigned_format = AFMT_U8; /* 0x00000008 unsigned 8 bit*/
-static int dsp_16bit_signed_format = AFMT_S16_LE; /* 0x00000010 signed 16 bit little endianess*/
+static int dsp_8bit_unsigned_format = AFMT_U8; /* 0x00000008 unsigned 8 bit */
+static int dsp_16bit_signed_format = AFMT_S16_LE; /* 0x00000010 signed 16 bit little endianness */
 
 static int supported_dsp_formats;
 
