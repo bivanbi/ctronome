@@ -1,7 +1,3 @@
-//
-// Created by bivanbi on 31.07.24.
-//
-
 #ifndef CTRONOME_DEFAULTS_H
 #define CTRONOME_DEFAULTS_H
 

@@ -1,3 +1,6 @@
+#ifndef CTRONOME_H
+#define CTRONOME_H
+
 #include <sys/soundcard.h>
 #include <stdint.h>
 #include "defaults.h"
@@ -52,3 +55,5 @@ void next_program(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);
 
 extern byte debug;
+
+#endif //CTRONOME_H
