@@ -31,7 +31,6 @@ struct dsp_device dsp_device;
 byte dsp_depth;
 
 int bpt_base_specified, bpm_base_specified;
-int i1, i2;
 
 byte debug;
 
@@ -154,91 +153,91 @@ void next_program(FILE *programfile) {
 void parm_init(int argc, char *argv[]) {
 
     /* first, get the parameters */
-    int i;
+    int current_argument, slash_position;
     dword bytes_read;
     FILE *wav_file;
 
     debug = 0;
     bpm_base_specified = bpt_base_specified = 0;
 
-    for (i = 1; i < argc; i++) {
+    for (current_argument = 1; current_argument < argc; current_argument++) {
         /* debug */
-        if ((strcmp(argv[i], "-debug") == 0) ||
-            (strcmp(argv[i], "--debug") == 0)) {
+        if ((strcmp(argv[current_argument], "-debug") == 0) ||
+            (strcmp(argv[current_argument], "--debug") == 0)) {
             printf("debug mode\n");
             debug = 1;
         }
     }
 
-    for (i = 1; i < argc; i++) {
+    for (current_argument = 1; current_argument < argc; current_argument++) {
         /* help */
-        if ((strcmp(argv[i], "-h") == 0) ||
-            (strcmp(argv[i], "--h") == 0) ||
-            (strcmp(argv[i], "-help") == 0) ||
-            (strcmp(argv[i], "--help") == 0)) {
+        if ((strcmp(argv[current_argument], "-h") == 0) ||
+            (strcmp(argv[current_argument], "--h") == 0) ||
+            (strcmp(argv[current_argument], "-help") == 0) ||
+            (strcmp(argv[current_argument], "--help") == 0)) {
             printf(HELP);
             exit(0);
         }
 
         /* version */
-        if ((strcmp(argv[i], "-v") == 0) ||
-            (strcmp(argv[i], "--v") == 0) ||
-            (strcmp(argv[i], "-version") == 0) ||
-            (strcmp(argv[i], "--version") == 0)) {
+        if ((strcmp(argv[current_argument], "-v") == 0) ||
+            (strcmp(argv[current_argument], "--v") == 0) ||
+            (strcmp(argv[current_argument], "-version") == 0) ||
+            (strcmp(argv[current_argument], "--version") == 0)) {
             printf("%s %s\n", MYNAME, VERSION);
             exit(0);
         }
 
         /* wav1 */
-        if ((strcmp(argv[i], "-w1") == 0) && (i + 1 < argc)) {
-            wav1_file_path = argv[++i];
+        if ((strcmp(argv[current_argument], "-w1") == 0) && (current_argument + 1 < argc)) {
+            wav1_file_path = argv[++current_argument];
             if (debug) printf("debug: wav1: '%s'\n", wav1_file_path);
         }
 
         /* wav2 */
-        if ((strcmp(argv[i], "-w2") == 0) && (i + 1 < argc)) {
-            wav2_file_path = argv[++i];
+        if ((strcmp(argv[current_argument], "-w2") == 0) && (current_argument + 1 < argc)) {
+            wav2_file_path = argv[++current_argument];
             if (debug) printf("debug: wav2: '%s'\n", wav2_file_path);
         }
 
         /* dsp device */
-        if ((strcmp(argv[i], "-d") == 0) && (i + 1 < argc)) {
-            dsp_device_path = argv[++i];
+        if ((strcmp(argv[current_argument], "-d") == 0) && (current_argument + 1 < argc)) {
+            dsp_device_path = argv[++current_argument];
             if (debug) printf("debug: dsp: '%s'\n", dsp_device_path);
         }
 
         /* bpt */
-        if ((strcmp(argv[i], "-t") == 0) && (i + 1 < argc)) {
-            i1 = search_byte_in_buffer(argv[++i], slash);
-            bpt[0] = atoi(argv[i]);
-            if (i1 >= 0) {
-                bpt[1] = atoi(argv[i] + ++i1);
+        if ((strcmp(argv[current_argument], "-t") == 0) && (current_argument + 1 < argc)) {
+            slash_position = search_byte_in_buffer(argv[++current_argument], slash);
+            bpt[0] = atoi(argv[current_argument]);
+            if (slash_position >= 0) {
+                bpt[1] = atoi(argv[current_argument] + ++slash_position);
                 bpt_base_specified = 1;
             }
             if (debug) printf("debug: bpt: '%d'/'%d'\n", bpt[0], bpt[1]);
         }
 
         /* bpm */
-        if ((strcmp(argv[i], "-b") == 0) && (i + 1 < argc)) {
-            i2 = search_byte_in_buffer(argv[++i], slash);
-            bpm[0] = atoi(argv[i]);
-            if (i2 >= 0) {
-                bpm[1] = atoi(argv[i] + ++i2);
+        if ((strcmp(argv[current_argument], "-b") == 0) && (current_argument + 1 < argc)) {
+            slash_position = search_byte_in_buffer(argv[++current_argument], slash);
+            bpm[0] = atoi(argv[current_argument]);
+            if (slash_position >= 0) {
+                bpm[1] = atoi(argv[current_argument] + ++slash_position);
                 bpm_base_specified = 1;
             }
             if (debug) printf("debug: bpm: '%d'/'%d'\n", bpm[0], bpm[1]);
         }
 
         /* pcount */
-        if ((strcmp(argv[i], "-c") == 0) && (i + 1 < argc)) {
-            pcount = atoi(argv[++i]);
+        if ((strcmp(argv[current_argument], "-c") == 0) && (current_argument + 1 < argc)) {
+            pcount = atoi(argv[++current_argument]);
             pdecrease = 1;
             if (debug) printf("debug: count: '%d'\n", pcount);
         }
 
         /* program file */
-        if ((strcmp(argv[i], "-p") == 0) && (i + 1 < argc)) {
-            programfile = argv[++i];
+        if ((strcmp(argv[current_argument], "-p") == 0) && (current_argument + 1 < argc)) {
+            programfile = argv[++current_argument];
             is_program = 1;
             if (debug) printf("debug: program: '%s'\n", programfile);
         }
