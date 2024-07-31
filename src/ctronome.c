@@ -30,7 +30,7 @@ FILE *program;
 int bpm[2];
 int bpt[2];
 
-byte is_program;
+byte is_program = 0;
 dword bpm_base_length;
 int tact_repetition_count = 1; /* tact counter */
 
