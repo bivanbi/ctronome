@@ -25,6 +25,7 @@ FILE *wavfile, *program;
 
 byte is_program;
 dword bpm_base_length;
+int tact_repetition_count = 1; /* tact counter */
 
 dword c1, c3, c4;
 
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (pcount > 0) {
-            if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", count, bpm[0], bpm[1], bpt[0], bpt[1]);
+            if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", tact_repetition_count, bpm[0], bpm[1], bpt[0], bpt[1]);
 
             /* calculate the appropriate pattern length for bpm and bpt */
             bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
                 dsp_pattern_length++;
             }
 
-            for (c4 = 0; c4 < count; c4++) {
+            for (c4 = 0; c4 < tact_repetition_count; c4++) {
                 dsp_write(dsp_device.handler, wav1.data, dsp_pattern_length);
                 for (c3 = bpt[0]; c3 > 1; c3--) {
                     dsp_write(dsp_device.handler, wav2.data, dsp_pattern_length);
@@ -70,46 +71,51 @@ int main(int argc, char *argv[]) {
 }
 
 void next_program(FILE *programfile) {
-    byte temp[8192];
-    dword lo1;
-    int lo2, lo3;
+    byte program_read_buffer[8192];
+    dword number_of_bytes_read;
+    int position_in_current_line;
+    int hashmark_position = 0;
+    int slash_position;
     /* a normal line should be at least 5 characters long + newline */
-    lo2 = 0;
-    while (lo2 >= 0) {
-        while ((lo1 = get_next_line(temp, programfile, 8192)) < 6) {
+    int minimum_line_length = 6;
+
+    /* Skip any line containing a hashmark */
+    while (hashmark_position >= 0) {
+        while ((number_of_bytes_read = get_next_line(program_read_buffer, programfile, 8192)) < minimum_line_length) {
             /* if 0 character has been read, seek to the beginning of the file */
-            if (lo1 < 1) {
+            if (number_of_bytes_read < 1) {
                 fseek(programfile, SEEK_SET, 0);
                 pcount -= pdecrease;
                 if (pcount) printf("repeat\n");
             }
         }
-        lo2 = str_search(temp, hashmark);
+        hashmark_position = search_byte_in_buffer(program_read_buffer, hashmark);
     }
-    count = atoi(temp);
+    // read number of repetitions for the tact described in current line
+    tact_repetition_count = atoi(program_read_buffer);
 
-    lo2 = str_search(temp, space);
-    lo2++;
-    lo2 += str_search(&temp[lo2], space);
+    position_in_current_line = search_byte_in_buffer(program_read_buffer, space);
+    position_in_current_line++;
+    position_in_current_line += search_byte_in_buffer(&program_read_buffer[position_in_current_line], space);
     bpm_base_specified = bpt_base_specified = 0;
 
-    if (lo2) {
-        lo3 = str_search(&temp[++lo2], slash);
-        bpt[0] = atoi(&temp[lo2]);
+    if (position_in_current_line) {
+        slash_position = search_byte_in_buffer(&program_read_buffer[++position_in_current_line], slash);
+        bpt[0] = atoi(&program_read_buffer[position_in_current_line]);
 
-        if (lo3 >= 0) {
-            bpt[1] = atoi(&temp[lo2] + ++lo3);
+        if (slash_position >= 0) {
+            bpt[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
             bpt_base_specified = 1;
         }
     }
 
-    lo2 = str_search(temp, space);
-    if (lo2) {
-        lo3 = str_search(&temp[++lo2], slash);
-        bpm[0] = atoi(&temp[lo2]);
-        if (debug) printf("debug: prg: bpm0: '%d', lo3: '%d'\n", bpm[0], lo3);
-        if (lo3 >= 0) {
-            bpm[1] = atoi(&temp[lo2] + ++lo3);
+    position_in_current_line = search_byte_in_buffer(program_read_buffer, space);
+    if (position_in_current_line) {
+        slash_position = search_byte_in_buffer(&program_read_buffer[++position_in_current_line], slash);
+        bpm[0] = atoi(&program_read_buffer[position_in_current_line]);
+        if (debug) printf("debug: prg: bpm0: '%d', lo3: '%d'\n", bpm[0], slash_position);
+        if (slash_position >= 0) {
+            bpm[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
             bpm_base_specified = 1;
         }
     }
@@ -199,7 +205,7 @@ void parm_init(int argc, char *argv[]) {
 
         /* bpt */
         if ((strcmp(argv[i], "-t") == 0) && (i + 1 < argc)) {
-            i1 = str_search(argv[++i], slash);
+            i1 = search_byte_in_buffer(argv[++i], slash);
             bpt[0] = atoi(argv[i]);
             if (i1 >= 0) {
                 bpt[1] = atoi(argv[i] + ++i1);
@@ -210,7 +216,7 @@ void parm_init(int argc, char *argv[]) {
 
         /* bpm */
         if ((strcmp(argv[i], "-b") == 0) && (i + 1 < argc)) {
-            i2 = str_search(argv[++i], slash);
+            i2 = search_byte_in_buffer(argv[++i], slash);
             bpm[0] = atoi(argv[i]);
             if (i2 >= 0) {
                 bpm[1] = atoi(argv[i] + ++i2);

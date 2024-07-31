@@ -3,10 +3,17 @@
 #include "ctronome.h"
 #include "routines.h"
 
-int str_search(byte *buffer, byte search) {
-    dword i = 0;
-    while ((buffer[i] != 0) && (buffer[i++] != search));
-    if (buffer[--i] == search) return (i);
+/**
+ * Search fora particular byte value in a null-terminated haystack, and return the position of the first match.
+ *
+ * @param haystack the null-terminated buffer to search in
+ * @param needle the value to look for
+ * @return First position of the value in the buffer if found, else -1.
+ */
+int search_byte_in_buffer(byte *haystack, byte needle) {
+    dword position = 0;
+    while ((haystack[position] != 0) && (haystack[position++] != needle));
+    if (haystack[--position] == needle) return (position);
     return (-1);
 }
 
