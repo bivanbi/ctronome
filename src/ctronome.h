@@ -57,8 +57,4 @@ static byte space = 32; /* the   character */
 void next_program(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);
 
-void dsp_close(byte);
-
-void dsp_write(byte, byte *, dword);
-
 extern byte debug;

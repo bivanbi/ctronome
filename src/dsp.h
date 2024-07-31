@@ -10,4 +10,8 @@ struct dsp_device {
 
 struct dsp_device dsp_init(byte *, word, word, dword);
 
+void dsp_close(byte);
+
+void dsp_write(byte, byte *, dword);
+
 #endif //CTRONOME_DSP_H
