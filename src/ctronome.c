@@ -294,6 +294,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     }
 
     /* open wav file 1 */
+    if (debug) printf("debug: Opening wav1 at '%s'\n", wav1_file_path);
     wav_file = open_file_for_reading(wav1_file_path);
 
     /* read the header first */
@@ -334,6 +335,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     fclose(wav_file);
 
     /* open wav file 2 */
+    if (debug) printf("debug: Opening wav2 at '%s'\n", wav1_file_path);
     wav_file = open_file_for_reading(wav2_file_path);
 
     /* read the header first */
@@ -370,7 +372,10 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     fclose(wav_file);
 
     /* open program file */
-    if (is_program) program = open_file_for_reading(programfile);
+    if (is_program) {
+        if (debug) printf("debug: opening program file: '%s'\n", programfile);
+        program = open_file_for_reading(programfile);
+    }
 
     printf("bpm: %d/%d, bpt: %d/%d", bpm[0], bpm[1], bpt[0], bpt[1]);
     if (pdecrease) printf(", repeat count: %d", pcount);
