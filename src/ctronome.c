@@ -27,8 +27,6 @@ byte is_program;
 dword bpm_base_length;
 int tact_repetition_count = 1; /* tact counter */
 
-dword c1, c3, c4;
-
 struct dsp_device dsp_device;
 byte dsp_depth;
 
@@ -57,9 +55,9 @@ int main(int argc, char *argv[]) {
                 dsp_pattern_length++;
             }
 
-            for (c4 = 0; c4 < tact_repetition_count; c4++) {
-                dsp_write(dsp_device.handler, wav1.data, dsp_pattern_length);
-                for (c3 = bpt[0]; c3 > 1; c3--) {
+            for (dword tact_repetitions = 0; tact_repetitions < tact_repetition_count; tact_repetitions++) {
+                dsp_write(dsp_device.handler, wav1.data, dsp_pattern_length); // accented beat
+                for (dword remaining_beat_count = bpt[0]; remaining_beat_count > 1; remaining_beat_count--) {
                     dsp_write(dsp_device.handler, wav2.data, dsp_pattern_length);
                 }
             }
@@ -273,9 +271,9 @@ void parm_init(int argc, char *argv[]) {
     if (bpt[1] > 50) bpt[1] = 50;
 
     /* cleanup buffers */
-    for (c1 = 0; c1 < 1000000; c1++) {
-        wav1.data[c1] = 0;
-        wav2.data[c1] = 0;
+    for (dword buffer_position = 0; buffer_position < 1000000; buffer_position++) {
+        wav1.data[buffer_position] = 0;
+        wav2.data[buffer_position] = 0;
     }
 
     /* open wav file 1 */
