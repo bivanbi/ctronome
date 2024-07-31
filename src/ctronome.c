@@ -6,8 +6,6 @@
 #include "routines.h"
 #include "dsp.h"
 
-dword bytes_read;
-
 dword dsp_pattern_length;
 
 struct wav_data {
@@ -23,21 +21,18 @@ dword wav_bytes_to_read;
 
 byte wav_header[100];
 
-const char *wave1, *wave2;
-
 FILE *wavfile, *program;
 
 byte is_program;
 dword bpm_base_length;
 
-dword c1, c2, c3, c4, lo;
+dword c1, c3, c4;
 
 struct dsp_device dsp_device;
 byte dsp_depth;
 
 int bpt_base_specified, bpm_base_specified;
-int i1, i2, i3, i4, i5;
-byte tmp[8219];
+int i1, i2;
 
 byte debug;
 
@@ -57,7 +52,7 @@ int main(int argc, char *argv[]) {
             bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
             dsp_pattern_length = bpm_base_length * bpm[1] / bpt[1];
 
-            while (i3 = dsp_pattern_length % (dsp_depth * dsp_device.number_of_channels)) {
+            while (dsp_pattern_length % (dsp_depth * dsp_device.number_of_channels)) {
                 dsp_pattern_length++;
             }
 
