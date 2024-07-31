@@ -38,7 +38,7 @@ FILE *open_file_for_reading(char *filename) {
     FILE *filehandle;
 
     if (!(filehandle = fopen(filename, "rb"))) {
-        printf("cannot open %s\n", filename);
+        printf("cannot open file for reading '%s'\n", filename);
         exit(1);
     }
 
