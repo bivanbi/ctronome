@@ -5,8 +5,8 @@
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
 
 /* set up these three variables to your system */
-static char *metronomewav1 = "/usr/share/ctronome/metronome1.wav\0";
-static char *metronomewav2 = "/usr/share/ctronome/metronome2.wav\0";
+static char *wav1_file_path = "/usr/share/ctronome/metronome1.wav\0";
+static char *wav2_file_path = "/usr/share/ctronome/metronome2.wav\0";
 static char *dsp_device_path = "/dev/dsp\0";
 
 /* means: 1/4, 1/8 etc. */

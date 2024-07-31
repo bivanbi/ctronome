@@ -28,8 +28,8 @@ files installed (they come with the Linux kernel source), and OSS
 ### Compile-time Configuration
 Edit [ctronome.h](src/ctronome.h) for defaults, the most important ones are:
    ```c
-   static char *metronomewav1 = "/usr/share/ctronome/metronome1.wav\0";
-   static char *metronomewav2 = "/usr/share/ctronome/metronome2.wav\0";
+   static char *wav1_file_path = "/usr/share/ctronome/metronome1.wav\0";
+   static char *wav2_file_path = "/usr/share/ctronome/metronome2.wav\0";
    static char *dsp_device_path = "/dev/dsp\0";
    ```
  

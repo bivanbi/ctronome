@@ -192,14 +192,14 @@ void parm_init(int argc, char *argv[]) {
 
         /* wav1 */
         if ((strcmp(argv[i], "-w1") == 0) && (i + 1 < argc)) {
-            metronomewav1 = argv[++i];
-            if (debug) printf("debug: wav1: '%s'\n", metronomewav1);
+            wav1_file_path = argv[++i];
+            if (debug) printf("debug: wav1: '%s'\n", wav1_file_path);
         }
 
         /* wav2 */
         if ((strcmp(argv[i], "-w2") == 0) && (i + 1 < argc)) {
-            metronomewav2 = argv[++i];
-            if (debug) printf("debug: wav2: '%s'\n", metronomewav2);
+            wav2_file_path = argv[++i];
+            if (debug) printf("debug: wav2: '%s'\n", wav2_file_path);
         }
 
         /* dsp device */
@@ -279,12 +279,12 @@ void parm_init(int argc, char *argv[]) {
     }
 
     /* open wav file 1 */
-    wavfile = open_file_for_reading(metronomewav1);
+    wavfile = open_file_for_reading(wav1_file_path);
 
     /* read the header first */
     bytes_read = fread(&wav_header, 1, 44, wavfile);
     if (bytes_read < 44) {
-        printf("wav file %s too short\n", metronomewav1);
+        printf("wav file %s too short\n", wav1_file_path);
         exit(1);
     }
 
@@ -312,19 +312,19 @@ void parm_init(int argc, char *argv[]) {
     bytes_read = fread(&wav1.data, 1, wav_bytes_to_read, wavfile);
     if (debug) printf("debug: wav1 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
-        printf("wav file %s too short\n", metronomewav1);
+        printf("wav file %s too short\n", wav1_file_path);
         exit(1);
     }
 
     fclose(wavfile);
 
     /* open wav file 2 */
-    wavfile = open_file_for_reading(metronomewav2);
+    wavfile = open_file_for_reading(wav2_file_path);
 
     /* read the header first */
     bytes_read = fread(&wav_header, 1, 44, wavfile);
     if (bytes_read < 44) {
-        printf("wav file %s too short\n", metronomewav2);
+        printf("wav file %s too short\n", wav2_file_path);
         exit(1);
     }
 
@@ -349,7 +349,7 @@ void parm_init(int argc, char *argv[]) {
     bytes_read = fread(&wav2.data, 1, wav_bytes_to_read, wavfile);
     if (debug) printf("debug: wav2 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
-        printf("wav file %s too short\n", metronomewav2);
+        printf("wav file %s too short\n", wav2_file_path);
         exit(1);
     }
     fclose(wavfile);
