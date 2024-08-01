@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     /* create an endless or pcount times loop */
     while (repeat_count > 0) {
         if (is_program) {
-            play_next_program_line(program);
+            parse_next_program_line(program);
         }
 
         if (repeat_count > 0) {
@@ -99,7 +99,7 @@ void set_default_values() {
  *
  * @param programfile the file handle to the program file
  */
-void play_next_program_line(FILE *programfile) {
+void parse_next_program_line(FILE *programfile) {
     char program_read_buffer[8192];
     dword number_of_bytes_read;
     int position_in_current_line;
