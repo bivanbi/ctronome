@@ -12,39 +12,39 @@ static int dsp_16bit_signed_format = AFMT_S16_LE; /* 0x00000010 signed 16 bit li
 
 static int supported_dsp_formats;
 
-struct dsp_device dsp_init(char *dsp_dev, word bitspersample, word channels, dword samplerate) {
+struct dsp_device dsp_init(char *dsp_dev, word bits_per_sample, word number_of_channels, dword sample_rate) {
     struct dsp_device dsp_device;
 
     dsp_device.dsp_format = 0;
-    if (debug) printf("debug: dsp.c: bitspersample: >%d<\n", bitspersample);
+    if (debug) printf("debug: dsp.c: bits per sample: >%d<\n", bits_per_sample);
     /* check parameters */
 
-    if (bitspersample == 8) {
+    if (bits_per_sample == 8) {
         dsp_device.dsp_format = dsp_8bit_unsigned_format;
     }
 
-    if (bitspersample == 16) {
+    if (bits_per_sample == 16) {
         dsp_device.dsp_format = dsp_16bit_signed_format;
     }
 
     if (dsp_device.dsp_format == 0) {
-        printf("FATAL: only 8 and 16 bits per sample are supported. (got: %d\n", bitspersample);
+        printf("FATAL: only 8 and 16 bits per sample are supported. (got: %d\n", bits_per_sample);
         exit(1);
     }
 
     if (debug) printf("debug: dsp.c: wanted AFMT: >%d<\n", dsp_device.dsp_format);
 
-    if ((channels < 1) || (channels > 2)) {
-        printf("FATAL: number of channels must be 1 (mono) or 2 (stereo) (got: %d\n", channels);
+    if ((number_of_channels < 1) || (number_of_channels > 2)) {
+        printf("FATAL: number of channels must be 1 (mono) or 2 (stereo) (got: %d\n", number_of_channels);
         exit(1);
     }
-    dsp_device.number_of_channels = channels;
+    dsp_device.number_of_channels = number_of_channels;
 
-    if ((samplerate < 8000) || (samplerate > 96000)) {
-        printf("FATAL: samplerate must be between 8000 and 96000 (got: %d\n", samplerate);
+    if ((sample_rate < 8000) || (sample_rate > 96000)) {
+        printf("FATAL: sample rate must be between 8000 and 96000 (got: %d\n", sample_rate);
         exit(1);
     }
-    dsp_device.sample_rate = samplerate;
+    dsp_device.sample_rate = sample_rate;
 
     /* Initialise dsp_dev */
     if (debug) printf("debug: opening dsp '%s'\n", dsp_dev);
@@ -72,12 +72,12 @@ struct dsp_device dsp_init(char *dsp_dev, word bitspersample, word channels, dwo
     }
 
     if (debug) printf("debug: dsp: set format returned '%d'\n", dsp_device.dsp_format);
-    if ((bitspersample == 8) && (dsp_device.dsp_format != dsp_8bit_unsigned_format)) {
+    if ((bits_per_sample == 8) && (dsp_device.dsp_format != dsp_8bit_unsigned_format)) {
         printf("FATAL: your dsp device does not seem to support unsigned 8 bit (AFMT_8U) format\n");
         exit(1);
     }
 
-    if ((bitspersample == 16) && (dsp_device.dsp_format != dsp_16bit_signed_format)) {
+    if ((bits_per_sample == 16) && (dsp_device.dsp_format != dsp_16bit_signed_format)) {
         printf("FATAL: your dsp device does not seem to support signed 16 bit (AFMT_S16_LE) format\n");
         exit(1);
     }
@@ -92,8 +92,8 @@ struct dsp_device dsp_init(char *dsp_dev, word bitspersample, word channels, dwo
     }
 
     if (debug) printf("debug: dsp: set no. of channels returned '%d'\n", dsp_device.number_of_channels);
-    if (dsp_device.number_of_channels != channels) {
-        printf("FATAL: your wav has %d channels, while your DSP only supports %d channels.\n", channels, dsp_device.number_of_channels);
+    if (dsp_device.number_of_channels != number_of_channels) {
+        printf("FATAL: your wav has %d channels, while your DSP only supports %d channels.\n", number_of_channels, dsp_device.number_of_channels);
         exit(1);
     }
 
@@ -106,8 +106,8 @@ struct dsp_device dsp_init(char *dsp_dev, word bitspersample, word channels, dwo
     }
 
     if (debug) printf("debug: dsp: set speed returned '%d'\n", dsp_device.sample_rate);
-    if (debug && (dsp_device.sample_rate != samplerate)) {
-        printf("debug: dsp: wav samplerate and dsp samplerate differs, will sound funny\n");
+    if (debug && (dsp_device.sample_rate != sample_rate)) {
+        printf("debug: dsp: anticipated sample rate and actual dsp sample rate differs, will sound funny\n");
     }
 
     return (dsp_device);
