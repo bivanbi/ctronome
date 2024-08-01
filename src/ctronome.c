@@ -10,7 +10,7 @@
 dword dsp_pattern_length;
 
 struct wav_data {
-    byte data[1000000];
+    byte data[MAXIMUM_WAV_DATA_SIZE_BYTES];
     word number_of_channels;
     dword sample_rate;
     word bits_per_sample;
