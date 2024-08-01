@@ -48,6 +48,8 @@ byte debug;
 int main(int argc, char *argv[]) {
     set_default_values();
     parse_command_line_arguments(argc, argv);
+    if (debug) printf("debug: repeat_count: '%d', finite repetition: '%d'\n", repeat_count, finite_repetition);
+
 
     /* create an endless or pcount times loop */
     while (repeat_count > 0) {
