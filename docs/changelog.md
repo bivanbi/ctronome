@@ -12,6 +12,8 @@
 - Do not display homepage with version number, only version number
 - Update help text for readability and add home page
 - Fix logical expressions in [dsp.c](../src/dsp.c) always evaluating to false
+- Prevent a possible buffer overflow when loading wav files into memory
+- Reformat and refactor code for readability and better maintainability
 
 ## v0.5.6
 - fixed compile-time warning in dsp.c:
