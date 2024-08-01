@@ -50,6 +50,7 @@ void set_default_values();
 
 void next_program(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);
+dword get_wav_maximum_number_of_bytes_to_read();
 
 extern byte debug;
 

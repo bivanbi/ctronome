@@ -333,8 +333,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
 
     wav_sample_size_bytes = wav1.bits_per_sample / 8;
 
-    wav_number_of_bytes_to_read = wav_sample_size_bytes * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
-    if (debug) printf("debug: maximum wav bytes to read: '%d'\n", wav_number_of_bytes_to_read);
+    wav_number_of_bytes_to_read = get_wav_maximum_number_of_bytes_to_read();
 
     bytes_read = fread(&wav1.data, 1, wav_number_of_bytes_to_read, wav_file);
     if (debug) printf("debug: wav1 bytes read: '%d'\n", bytes_read);
@@ -392,4 +391,26 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     if (finite_repetition) printf(", repeat count: %d", repeat_count);
     if (is_program) printf("\nprogram file: %s", programfile);
     printf("\n");
+}
+
+/**
+ * Calculate the maximum number of bytes to read from the wav file to have 0.5 seconds of sound.
+ * Any longer metronome sample would not make much sense.
+ *
+ * @return maximum number of bytes to read, capped at MAXIMUM_WAV_DATA_SIZE_BYTES for safety
+ */
+dword get_wav_maximum_number_of_bytes_to_read() {
+    if (debug) printf("debug: wav sample size bytes: %d, number of channels: %d, sample rate: %d\n",
+                      wav_sample_size_bytes, dsp_device.number_of_channels, dsp_device.sample_rate);
+    int maximum_number_of_bytes_to_read = wav_sample_size_bytes * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
+
+    if (maximum_number_of_bytes_to_read > MAXIMUM_WAV_DATA_SIZE_BYTES) {
+        printf("WARN: calculated wav_number_of_bytes_to_read '%d' would overstep MAXIMUM_WAV_DATA_SIZE_BYTES '%d', might be a bug\n",
+               maximum_number_of_bytes_to_read, MAXIMUM_WAV_DATA_SIZE_BYTES);
+        maximum_number_of_bytes_to_read = MAXIMUM_WAV_DATA_SIZE_BYTES;
+    }
+
+    if (debug) printf("debug: maximum wav bytes to read: '%d'\n", maximum_number_of_bytes_to_read);
+
+    return maximum_number_of_bytes_to_read;
 }
