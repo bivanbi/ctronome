@@ -18,7 +18,7 @@ struct wav_data {
 
 struct wav_data wav1, wav2;
 
-dword wav_bytes_to_read;
+dword wav_number_of_bytes_to_read;
 
 byte wav_header[100];
 
@@ -27,15 +27,19 @@ char *wav2_file_path;
 char *dsp_device_path;
 
 FILE *program;
-int bpm[2];
-int bpt[2];
-
 byte is_program = 0;
+
+int repeat_count = 1; /* repeat tact/program pcount times then exit; 0 means repeat infinite times */
+int finite_repetition = 0; /* if repetition count is specified on command line, this will be set to 1, to create a finite loop */
+
+int beat_per_minute[2];
+int beat_per_tact[2];
+
 dword bpm_base_length;
-int tact_repetition_count = 1; /* tact counter */
+int tact_repetition_count = 1; /* repeat tact this many times - each program line sets this accordingly */
 
 struct dsp_device dsp_device;
-byte dsp_depth;
+byte wav_sample_size_bytes;
 
 int bpt_base_specified, bpm_base_specified;
 
@@ -46,29 +50,33 @@ int main(int argc, char *argv[]) {
     parse_command_line_arguments(argc, argv);
 
     /* create an endless or pcount times loop */
-    while (pcount > 0) {
+    while (repeat_count > 0) {
         if (is_program) {
             next_program(program);
         }
 
-        if (pcount > 0) {
-            if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", tact_repetition_count, bpm[0], bpm[1], bpt[0], bpt[1]);
+        if (repeat_count > 0) {
+            if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", tact_repetition_count, beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1]);
 
             /* calculate the appropriate pattern length for bpm and bpt */
-            bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
-            dsp_pattern_length = bpm_base_length * bpm[1] / bpt[1];
+            bpm_base_length = dsp_device.sample_rate * wav_sample_size_bytes * dsp_device.number_of_channels * 60 / beat_per_minute[0];
+            dsp_pattern_length = bpm_base_length * beat_per_minute[1] / beat_per_tact[1];
 
-            while (dsp_pattern_length % (dsp_depth * dsp_device.number_of_channels)) {
+            while (dsp_pattern_length % (wav_sample_size_bytes * dsp_device.number_of_channels)) {
                 dsp_pattern_length++;
             }
 
             for (dword tact_repetitions = 0; tact_repetitions < tact_repetition_count; tact_repetitions++) {
                 dsp_write(dsp_device.handler, wav1.data, dsp_pattern_length); // accented beat
-                for (dword remaining_beat_count = bpt[0]; remaining_beat_count > 1; remaining_beat_count--) {
+                for (dword remaining_beat_count = beat_per_tact[0]; remaining_beat_count > 1; remaining_beat_count--) {
                     dsp_write(dsp_device.handler, wav2.data, dsp_pattern_length);
                 }
             }
-            if (!(is_program)) pcount -= pdecrease;
+
+            if (!(is_program) && (finite_repetition)) {
+                repeat_count--;
+                if (debug) printf("debug: Finite repetition, repetitions remaining: %d\n", repeat_count);
+            }
         }
     }
     dsp_close(dsp_device.handler);
@@ -80,8 +88,8 @@ void set_default_values() {
     wav2_file_path = (char *) default_wav2_file_path;
     dsp_device_path = (char *) default_dsp_device_path;
 
-    memcpy(&bpm, &default_bpm, sizeof (default_bpm));
-    memcpy(&bpt, &default_bpt, sizeof (default_bpt));
+    memcpy(&beat_per_minute, &default_beat_per_minute, sizeof (default_beat_per_minute));
+    memcpy(&beat_per_tact, &default_beat_per_tact, sizeof (default_beat_per_tact));
 }
 
 /**
@@ -104,8 +112,8 @@ void next_program(FILE *programfile) {
             /* if 0 character has been read, seek to the beginning of the file */
             if (number_of_bytes_read < 1) {
                 fseek(programfile, SEEK_SET, 0);
-                pcount -= pdecrease;
-                if (pcount) printf("repeat\n");
+                if (finite_repetition) repeat_count--;
+                if (repeat_count) printf("repeat\n");
             }
         }
         hashmark_position = search_character_in_buffer(program_read_buffer, hashmark);
@@ -120,10 +128,10 @@ void next_program(FILE *programfile) {
 
     if (position_in_current_line) {
         slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
-        bpt[0] = atoi(&program_read_buffer[position_in_current_line]);
+        beat_per_tact[0] = atoi(&program_read_buffer[position_in_current_line]);
 
         if (slash_position >= 0) {
-            bpt[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
+            beat_per_tact[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
             bpt_base_specified = 1;
         }
     }
@@ -131,10 +139,11 @@ void next_program(FILE *programfile) {
     position_in_current_line = search_character_in_buffer(program_read_buffer, space);
     if (position_in_current_line) {
         slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
-        bpm[0] = atoi(&program_read_buffer[position_in_current_line]);
-        if (debug) printf("debug: prg: bpm0: '%d', lo3: '%d'\n", bpm[0], slash_position);
+        beat_per_minute[0] = atoi(&program_read_buffer[position_in_current_line]);
+        if (debug) printf("debug: program line: bpm: '%d/%d', bpt: '%d/%d', slash position: %d\n",
+                          beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1], slash_position);
         if (slash_position >= 0) {
-            bpm[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
+            beat_per_minute[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
             bpm_base_specified = 1;
         }
     }
@@ -142,29 +151,29 @@ void next_program(FILE *programfile) {
     /* some parameter post-processing */
     if (!(bpt_base_specified)) {
         if (bpm_base_specified) {
-            bpt[1] = bpm[1];
+            beat_per_tact[1] = beat_per_minute[1];
         } else {
-            bpt[1] = default_base_note;
+            beat_per_tact[1] = default_base_note;
         }
     }
 
     if (!(bpm_base_specified)) {
         if (bpt_base_specified) {
-            bpm[1] = bpt[1];
+            beat_per_minute[1] = beat_per_tact[1];
         } else {
-            bpm[1] = default_base_note;
+            beat_per_minute[1] = default_base_note;
         }
     }
 
-    if (bpt[0] < 1) bpt[0] = 1;
-    if (bpt[0] > 50) bpt[0] = 50;
-    if (bpt[1] < 1) bpt[1] = 1;
-    if (bpt[1] > 50) bpt[1] = 50;
+    if (beat_per_tact[0] < 1) beat_per_tact[0] = 1;
+    if (beat_per_tact[0] > 50) beat_per_tact[0] = 50;
+    if (beat_per_tact[1] < 1) beat_per_tact[1] = 1;
+    if (beat_per_tact[1] > 50) beat_per_tact[1] = 50;
 
-    if (bpm[0] > 250) bpm[0] = 250;
-    if (bpm[0] < 30) bpm[0] = 30;
-    if (bpm[1] > 20) bpm[1] = 20;
-    if (bpm[1] < 1) bpm[1] = 1;
+    if (beat_per_minute[0] > 250) beat_per_minute[0] = 250;
+    if (beat_per_minute[0] < 30) beat_per_minute[0] = 30;
+    if (beat_per_minute[1] > 20) beat_per_minute[1] = 20;
+    if (beat_per_minute[1] < 1) beat_per_minute[1] = 1;
 }
 
 void parse_command_line_arguments(int argc, char *argv[]) {
@@ -226,30 +235,30 @@ void parse_command_line_arguments(int argc, char *argv[]) {
         /* bpt */
         if ((strcmp(argv[current_argument], "-t") == 0) && (current_argument + 1 < argc)) {
             slash_position = search_character_in_buffer(argv[++current_argument], slash);
-            bpt[0] = atoi(argv[current_argument]);
+            beat_per_tact[0] = atoi(argv[current_argument]);
             if (slash_position >= 0) {
-                bpt[1] = atoi(argv[current_argument] + ++slash_position);
+                beat_per_tact[1] = atoi(argv[current_argument] + ++slash_position);
                 bpt_base_specified = 1;
             }
-            if (debug) printf("debug: bpt: '%d'/'%d'\n", bpt[0], bpt[1]);
+            if (debug) printf("debug: bpt: '%d'/'%d'\n", beat_per_tact[0], beat_per_tact[1]);
         }
 
         /* bpm */
         if ((strcmp(argv[current_argument], "-b") == 0) && (current_argument + 1 < argc)) {
             slash_position = search_character_in_buffer(argv[++current_argument], slash);
-            bpm[0] = atoi(argv[current_argument]);
+            beat_per_minute[0] = atoi(argv[current_argument]);
             if (slash_position >= 0) {
-                bpm[1] = atoi(argv[current_argument] + ++slash_position);
+                beat_per_minute[1] = atoi(argv[current_argument] + ++slash_position);
                 bpm_base_specified = 1;
             }
-            if (debug) printf("debug: bpm: '%d'/'%d'\n", bpm[0], bpm[1]);
+            if (debug) printf("debug: bpm: '%d'/'%d'\n", beat_per_minute[0], beat_per_minute[1]);
         }
 
-        /* pcount */
+        /* repetition count */
         if ((strcmp(argv[current_argument], "-c") == 0) && (current_argument + 1 < argc)) {
-            pcount = atoi(argv[++current_argument]);
-            pdecrease = 1;
-            if (debug) printf("debug: count: '%d'\n", pcount);
+            repeat_count = atoi(argv[++current_argument]);
+            finite_repetition = 1;
+            if (debug) printf("debug: count: '%d', finite repetition: '%d'\n", repeat_count, finite_repetition);
         }
 
         /* program file */
@@ -263,29 +272,29 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     /* some parameter post-processing */
     if (!(bpt_base_specified)) {
         if (bpm_base_specified) {
-            bpt[1] = bpm[1];
+            beat_per_tact[1] = beat_per_minute[1];
         } else {
-            bpt[1] = default_base_note;
+            beat_per_tact[1] = default_base_note;
         }
     }
 
     if (!(bpm_base_specified)) {
         if (bpt_base_specified) {
-            bpm[1] = bpt[1];
+            beat_per_minute[1] = beat_per_tact[1];
         } else {
-            bpm[1] = default_base_note;
+            beat_per_minute[1] = default_base_note;
         }
     }
 
-    if (bpm[0] > 250) bpm[0] = 250;
-    if (bpm[0] < 30) bpm[0] = 30;
-    if (bpm[1] > 20) bpm[1] = 20;
-    if (bpm[1] < 1) bpm[1] = 1;
+    if (beat_per_minute[0] > 250) beat_per_minute[0] = 250;
+    if (beat_per_minute[0] < 30) beat_per_minute[0] = 30;
+    if (beat_per_minute[1] > 20) beat_per_minute[1] = 20;
+    if (beat_per_minute[1] < 1) beat_per_minute[1] = 1;
 
-    if (bpt[0] < 1) bpt[0] = 1;
-    if (bpt[0] > 50) bpt[0] = 50;
-    if (bpt[1] < 1) bpt[1] = 1;
-    if (bpt[1] > 50) bpt[1] = 50;
+    if (beat_per_tact[0] < 1) beat_per_tact[0] = 1;
+    if (beat_per_tact[0] > 50) beat_per_tact[0] = 50;
+    if (beat_per_tact[1] < 1) beat_per_tact[1] = 1;
+    if (beat_per_tact[1] > 50) beat_per_tact[1] = 50;
 
     /* cleanup buffers */
     for (dword buffer_position = 0; buffer_position < 1000000; buffer_position++) {
@@ -317,15 +326,15 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     dsp_device = dsp_init(dsp_device_path, wav1.bits_per_sample, wav1.number_of_channels, wav1.sample_rate);
 
     if (debug)
-        printf("debug: dsp channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
+        printf("debug: dsp channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
                dsp_device.number_of_channels, dsp_device.sample_rate, dsp_device.dsp_format);
 
-    dsp_depth = dsp_device.dsp_format / 8;
+    wav_sample_size_bytes = wav1.bits_per_sample / 8;
 
-    wav_bytes_to_read = dsp_depth * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
-    if (debug) printf("debug: maximum wav bytes to read: '%d'\n", wav_bytes_to_read);
+    wav_number_of_bytes_to_read = wav_sample_size_bytes * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
+    if (debug) printf("debug: maximum wav bytes to read: '%d'\n", wav_number_of_bytes_to_read);
 
-    bytes_read = fread(&wav1.data, 1, wav_bytes_to_read, wav_file);
+    bytes_read = fread(&wav1.data, 1, wav_number_of_bytes_to_read, wav_file);
     if (debug) printf("debug: wav1 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
         printf("wav file %s too short\n", wav1_file_path);
@@ -363,7 +372,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
         printf("debug: wav1 and wav2 sample rate differs, may sound funny\n");
     }
 
-    bytes_read = fread(&wav2.data, 1, wav_bytes_to_read, wav_file);
+    bytes_read = fread(&wav2.data, 1, wav_number_of_bytes_to_read, wav_file);
     if (debug) printf("debug: wav2 bytes read: '%d'\n", bytes_read);
     if (bytes_read < 10) {
         printf("wav file %s too short\n", wav2_file_path);
@@ -377,8 +386,8 @@ void parse_command_line_arguments(int argc, char *argv[]) {
         program = open_file_for_reading(programfile);
     }
 
-    printf("bpm: %d/%d, bpt: %d/%d", bpm[0], bpm[1], bpt[0], bpt[1]);
-    if (pdecrease) printf(", repeat count: %d", pcount);
+    printf("bpm: %d/%d, bpt: %d/%d", beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1]);
+    if (finite_repetition) printf(", repeat count: %d", repeat_count);
     if (is_program) printf("\nprogram file: %s", programfile);
     printf("\n");
 }

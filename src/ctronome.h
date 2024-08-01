@@ -42,9 +42,6 @@ typedef DWORD dword;
 typedef WORD word;
 typedef BYTE byte;
 
-static int pcount = 1; /* repeat tact/program pcount times then exit; 0 means repeat infinite times */
-static int pdecrease = 0;
-
 static const char slash = 47; /* the / character */
 static const char hashmark = 35; /* the # character */
 static const char space = 32; /* the   character */
