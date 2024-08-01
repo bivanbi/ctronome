@@ -26,6 +26,7 @@ char *wav1_file_path;
 char *wav2_file_path;
 char *dsp_device_path;
 
+char *program_file_path;
 FILE *program;
 byte is_program = 0;
 
@@ -265,9 +266,9 @@ void parse_command_line_arguments(int argc, char *argv[]) {
 
         /* program file */
         if ((strcmp(argv[current_argument], "-p") == 0) && (current_argument + 1 < argc)) {
-            programfile = argv[++current_argument];
+            program_file_path = argv[++current_argument];
             is_program = 1;
-            if (debug) printf("debug: program: '%s'\n", programfile);
+            if (debug) printf("debug: program: '%s'\n", program_file_path);
         }
     }
 
@@ -383,13 +384,13 @@ void parse_command_line_arguments(int argc, char *argv[]) {
 
     /* open program file */
     if (is_program) {
-        if (debug) printf("debug: opening program file: '%s'\n", programfile);
-        program = open_file_for_reading(programfile);
+        if (debug) printf("debug: opening program file: '%s'\n", program_file_path);
+        program = open_file_for_reading(program_file_path);
     }
 
     printf("bpm: %d/%d, bpt: %d/%d", beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1]);
     if (finite_repetition) printf(", repeat count: %d", repeat_count);
-    if (is_program) printf("\nprogram file: %s", programfile);
+    if (is_program) printf("\nprogram file: %s", program_file_path);
     printf("\n");
 }
 

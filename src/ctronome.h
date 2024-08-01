@@ -9,8 +9,6 @@
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
 
 
-static char *programfile;
-
 #define HELP "usage: ctronome <parameters>\n\
 Play metronome sound at desired speed through sound card\n\
 Complex rhytmic patterns can be achieved by using a program file.\n\
