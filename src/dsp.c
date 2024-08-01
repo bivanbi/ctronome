@@ -124,5 +124,4 @@ void dsp_write(byte dsp_handle, byte *from, dword count) {
         printf("FATAL: tried to write %d bytes to dsp device,\nonly %d is written\n", count, bytes_written);
         exit(1);
     }
-    return;
 }
