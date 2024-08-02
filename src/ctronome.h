@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "defaults.h"
 
-#define MYNAME "ctronome"
+#define MY_NAME "ctronome"
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
 
 

@@ -211,7 +211,7 @@ void parse_command_line_arguments(int argc, char *argv[]) {
             (strcmp(argv[current_argument], "--v") == 0) ||
             (strcmp(argv[current_argument], "-version") == 0) ||
             (strcmp(argv[current_argument], "--version") == 0)) {
-            printf("%s %s\n", MYNAME, VERSION);
+            printf("%s %s\n", MY_NAME, VERSION);
             exit(0);
         }
 

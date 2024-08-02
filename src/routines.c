@@ -17,11 +17,11 @@ int search_character_in_buffer(char *haystack, char needle) {
     return (-1);
 }
 
-dword get_next_line(char *buffer, FILE *filehandle, dword max) {
+dword get_next_line(char *buffer, FILE *file, dword max) {
     dword length;
     length = 0;
 
-    while (fread(&buffer[length], 1, 1, filehandle) &&
+    while (fread(&buffer[length], 1, 1, file) &&
            (buffer[length++] != '\n') &&
            (length < max));
 
@@ -34,13 +34,13 @@ dword get_next_line(char *buffer, FILE *filehandle, dword max) {
     return (length);
 }
 
-FILE *open_file_for_reading(char *filename) {
-    FILE *filehandle;
+FILE *open_file_for_reading(char *file_path) {
+    FILE *file;
 
-    if (!(filehandle = fopen(filename, "rb"))) {
-        printf("cannot open file for reading '%s'\n", filename);
+    if (!(file = fopen(file_path, "rb"))) {
+        printf("cannot open file for reading '%s'\n", file_path);
         exit(1);
     }
 
-    return (filehandle);
+    return (file);
 }
