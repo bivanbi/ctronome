@@ -59,7 +59,9 @@ int main(int argc, char *argv[]) {
         }
 
         if (repeat_count > 0) {
-            if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", tact_repetition_count, beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1]);
+            if (is_program)
+                printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", tact_repetition_count, beat_per_minute[0], beat_per_minute[1], beat_per_tact[0],
+                       beat_per_tact[1]);
 
             /* calculate the appropriate pattern length for bpm and bpt */
             bpm_base_length = dsp_device.sample_rate * wav_sample_size_bytes * dsp_device.number_of_channels * 60 / beat_per_minute[0];
@@ -91,8 +93,8 @@ void set_default_values() {
     wav2_file_path = (char *) default_wav2_file_path;
     dsp_device_path = (char *) default_dsp_device_path;
 
-    memcpy(&beat_per_minute, &default_beat_per_minute, sizeof (default_beat_per_minute));
-    memcpy(&beat_per_tact, &default_beat_per_tact, sizeof (default_beat_per_tact));
+    memcpy(&beat_per_minute, &default_beat_per_minute, sizeof(default_beat_per_minute));
+    memcpy(&beat_per_tact, &default_beat_per_tact, sizeof(default_beat_per_tact));
 }
 
 /**
@@ -143,8 +145,9 @@ void parse_next_program_line(FILE *programfile) {
     if (position_in_current_line) {
         slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
         beat_per_minute[0] = atoi(&program_read_buffer[position_in_current_line]);
-        if (debug) printf("debug: program line: bpm: '%d/%d', bpt: '%d/%d', slash position: %d\n",
-                          beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1], slash_position);
+        if (debug)
+            printf("debug: program line: bpm: '%d/%d', bpt: '%d/%d', slash position: %d\n",
+                   beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1], slash_position);
         if (slash_position >= 0) {
             beat_per_minute[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
             bpm_base_specified = 1;
@@ -401,8 +404,9 @@ void parse_command_line_arguments(int argc, char *argv[]) {
  * @return maximum number of bytes to read, capped at MAXIMUM_WAV_DATA_SIZE_BYTES for safety
  */
 dword get_wav_maximum_number_of_bytes_to_read() {
-    if (debug) printf("debug: wav sample size bytes: %d, number of channels: %d, sample rate: %d\n",
-                      wav_sample_size_bytes, dsp_device.number_of_channels, dsp_device.sample_rate);
+    if (debug)
+        printf("debug: wav sample size bytes: %d, number of channels: %d, sample rate: %d\n",
+               wav_sample_size_bytes, dsp_device.number_of_channels, dsp_device.sample_rate);
     int maximum_number_of_bytes_to_read = wav_sample_size_bytes * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
 
     if (maximum_number_of_bytes_to_read > MAXIMUM_WAV_DATA_SIZE_BYTES) {
