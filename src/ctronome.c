@@ -30,8 +30,8 @@ char *program_file_path;
 FILE *program;
 byte is_program = 0;
 
-int repeat_count = 1; /* repeat tact/program pcount times then exit; 0 means repeat infinite times */
-int finite_repetition = 0; /* if repetition count is specified on command line, this will be set to 1, to create a finite loop */
+int repeat_count = 1; /* repeat tact/program this many times then exit; 0 means repeat infinite times */
+int finite_repetition = 0; /* if repeat count is specified on command line, this will be set to 1, to create a finite loop */
 
 int beat_per_minute[2];
 int beat_per_tact[2];
