@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     if (debug) printf("debug: repeat_count: '%d', finite repetition: '%d'\n", repeat_count, finite_repetition);
 
 
-    /* create an endless or pcount times loop */
+    /* create an endless or finite times loop depending on the value of finite_repetition */
     while (repeat_count > 0) {
         if (is_program) {
             parse_next_program_line(program);
