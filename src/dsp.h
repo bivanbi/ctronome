@@ -1,6 +1,13 @@
 #ifndef CTRONOME_DSP_H
 #define CTRONOME_DSP_H
 
+typedef uint32_t DWORD;
+typedef uint16_t WORD;
+typedef uint8_t BYTE;
+typedef DWORD dword;
+typedef WORD word;
+typedef BYTE byte;
+
 struct dsp_device {
     int handler;
     word number_of_channels;
