@@ -8,7 +8,6 @@
 #define MY_NAME "ctronome"
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
 
-
 #define HELP "usage: ctronome <parameters>\n\
 Play metronome sound at desired speed through sound card\n\
 Complex rhytmic patterns can be achieved by using a program file.\n\
@@ -32,6 +31,18 @@ For example program file see docs/prog_example.txt\n\
 \n\
 Home page: " HOMEPAGE "\n"
 
+#define MAXIMUM_WAV_DATA_SIZE_BYTES 1000000
+
+#define MAXIMUM_BEAT_PER_MINUTE 250
+#define MINIMUM_BEAT_PER_MINUTE 30
+#define BPM_MINIMUM_BASE_NOTE 1
+#define BPM_MAXIMUM_BASE_NOTE 20
+
+#define MINIMUM_BEAT_PER_TACT 1
+#define MAXIMUM_BEAT_PER_TACT 50
+#define BPT_MINIMUM_BASE_NOTE 1
+#define BPT_MAXIMUM_BASE_NOTE 50
+
 /* my lazy type definitions */
 typedef uint32_t DWORD;
 typedef uint16_t WORD;
@@ -51,18 +62,49 @@ struct WavData {
     word bits_per_sample;
 };
 
-void set_default_values();
+struct Arguments {
+    char *wav1_file_path;
+    char *wav2_file_path;
+    char *dsp_device_path;
+    char *program_file_path;
+    byte help_requested;
+    byte version_requested;
+    byte is_program;
+    int beat_per_minute[2];
+    int beat_per_tact[2];
+    byte bpm_base_specified;
+    byte bpt_base_specified;
+    int repeat_count;
+    int tact_repeat_count; // used in programs to set tact repetition times for each program line
+    int finite_repetition;
+};
 
-void parse_next_program_line(FILE *); /* process the next line of program */
-void parse_command_line_arguments(int, char *[]);
+
+struct Arguments get_default_arguments();
+
+struct Arguments parse_command_line_arguments(int, char *[]);
+
+void exit_with_help();
+
+void exit_with_version();
+
+void print_arguments(struct Arguments *);
+
+void apply_base_note_defaults(struct Arguments *);
+
+void apply_beat_per_minute_limits(struct Arguments *);
+
+void apply_beat_per_tact_limits(struct Arguments *);
+
+void parse_next_program_line(struct Arguments *, FILE *); /* process the next line of program */
 
 void read_wav_file(struct WavData *, char *);
 
-void verify_wav_files();
+void verify_wav_files(struct WavData *, struct WavData *);
 
-void open_program_file();
+FILE *open_program_file(char *);
 
-void open_sound_device();
+struct DspDevice open_sound_device(char *, struct WavData *);
 
 extern byte debug;
 
