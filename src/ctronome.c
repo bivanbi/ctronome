@@ -9,14 +9,14 @@
 
 dword dsp_pattern_length;
 
-struct wav_data {
+struct WavData {
     byte data[MAXIMUM_WAV_DATA_SIZE_BYTES];
     word number_of_channels;
     dword sample_rate;
     word bits_per_sample;
 };
 
-struct wav_data wav1, wav2;
+struct WavData wav1, wav2;
 
 dword wav_number_of_bytes_to_read;
 
@@ -39,7 +39,7 @@ int beat_per_tact[2];
 dword bpm_base_length;
 int tact_repetition_count = 1; /* repeat tact this many times - each program line sets this accordingly */
 
-struct dsp_device dsp_device;
+struct DspDevice dsp_device;
 byte wav_sample_size_bytes;
 
 int bpt_base_specified, bpm_base_specified;

@@ -12,8 +12,8 @@ static int dsp_16bit_signed_format = AFMT_S16_LE; /* 0x00000010 signed 16 bit li
 
 static int supported_dsp_formats;
 
-struct dsp_device dsp_init(char *dsp_device_path, word bits_per_sample, word number_of_channels, dword sample_rate) {
-    struct dsp_device dsp_device;
+struct DspDevice dsp_init(char *dsp_device_path, word bits_per_sample, word number_of_channels, dword sample_rate) {
+    struct DspDevice dsp_device;
 
     parse_dsp_bits_per_sample(&dsp_device, bits_per_sample);
     parse_dsp_number_of_channels(&dsp_device, number_of_channels);
@@ -29,7 +29,7 @@ struct dsp_device dsp_init(char *dsp_device_path, word bits_per_sample, word num
     return (dsp_device);
 }
 
-void parse_dsp_bits_per_sample(struct dsp_device *dsp_device, word bits_per_sample) {
+void parse_dsp_bits_per_sample(struct DspDevice *dsp_device, word bits_per_sample) {
     dsp_device->dsp_format = 0;
     if (debug) printf("debug: dsp.c: bits per sample: >%d<\n", bits_per_sample);
 
@@ -45,7 +45,7 @@ void parse_dsp_bits_per_sample(struct dsp_device *dsp_device, word bits_per_samp
     if (debug) printf("debug: dsp.c: wanted AFMT: >%d<\n", dsp_device->dsp_format);
 }
 
-void parse_dsp_number_of_channels(struct dsp_device *dsp_device, word number_of_channels) {
+void parse_dsp_number_of_channels(struct DspDevice *dsp_device, word number_of_channels) {
     if ((number_of_channels < 1) || (number_of_channels > 2)) {
         printf("FATAL: number of channels must be 1 (mono) or 2 (stereo) (got: %d\n", number_of_channels);
         exit(1);
@@ -53,7 +53,7 @@ void parse_dsp_number_of_channels(struct dsp_device *dsp_device, word number_of_
     dsp_device->number_of_channels = number_of_channels;
 }
 
-void parse_dsp_sample_rate(struct dsp_device *dsp_device, dword sample_rate) {
+void parse_dsp_sample_rate(struct DspDevice *dsp_device, dword sample_rate) {
     if ((sample_rate < 8000) || (sample_rate > 96000)) {
         printf("FATAL: sample rate must be between 8000 and 96000 (got: %d\n", sample_rate);
         exit(1);
@@ -61,7 +61,7 @@ void parse_dsp_sample_rate(struct dsp_device *dsp_device, dword sample_rate) {
     dsp_device->sample_rate = sample_rate;
 }
 
-void open_dsp_device(struct dsp_device *dsp_device, char *dsp_device_path) {
+void open_dsp_device(struct DspDevice *dsp_device, char *dsp_device_path) {
     if (debug) printf("debug: opening dsp '%s'\n", dsp_device_path);
     if ((dsp_device->handler = open(dsp_device_path, O_WRONLY)) == -1) {
         printf("FATAL: cannot open dsp device %s\n", dsp_device_path);
@@ -71,7 +71,7 @@ void open_dsp_device(struct dsp_device *dsp_device, char *dsp_device_path) {
     if (debug) printf("debug: dsp device %s opened successfully\n", dsp_device_path);
 }
 
-void set_dsp_format(struct dsp_device *dsp_device, char *dsp_device_path) {
+void set_dsp_format(struct DspDevice *dsp_device, char *dsp_device_path) {
     if (debug) {
         if (ioctl(dsp_device->handler, SNDCTL_DSP_GETFMTS, &supported_dsp_formats) == -1) {
             printf("FATAL: unable to get supported formats from '%s'\n", dsp_device_path);
@@ -91,7 +91,7 @@ void set_dsp_format(struct dsp_device *dsp_device, char *dsp_device_path) {
     if (debug) printf("debug: dsp: set format returned '%d'\n", dsp_device->dsp_format);
 }
 
-void set_dsp_sample_rate(struct dsp_device *dsp_device, char *dsp_device_path) {
+void set_dsp_sample_rate(struct DspDevice *dsp_device, char *dsp_device_path) {
     if (debug) printf("debug: dsp: set sample rate: SNDCTL_DSP_SPEED(%d)\n", dsp_device->sample_rate);
     if (ioctl(dsp_device->handler, SNDCTL_DSP_SPEED, &dsp_device->sample_rate) == -1) {
         printf("FATAL: unable to set sample rate for %s\n", dsp_device_path);
@@ -100,7 +100,7 @@ void set_dsp_sample_rate(struct dsp_device *dsp_device, char *dsp_device_path) {
     }
 }
 
-void set_dsp_number_of_channels(struct dsp_device *dsp_device, char *dsp_device_path) {
+void set_dsp_number_of_channels(struct DspDevice *dsp_device, char *dsp_device_path) {
     if (debug) printf("debug: dsp: set number of channels: SNDCTL_DSP_CHANNELS(%d)\n", dsp_device->number_of_channels);
     if (ioctl(dsp_device->handler, SNDCTL_DSP_CHANNELS, &dsp_device->number_of_channels) == -1) {
         printf("FATAL: unable to set no. of channels for %s\n", dsp_device_path);
@@ -109,7 +109,7 @@ void set_dsp_number_of_channels(struct dsp_device *dsp_device, char *dsp_device_
     }
 }
 
-void verify_dsp_device(struct dsp_device *dsp_device, word bits_per_sample, word number_of_channels, dword sample_rate) {
+void verify_dsp_device(struct DspDevice *dsp_device, word bits_per_sample, word number_of_channels, dword sample_rate) {
     if ((bits_per_sample == 8) && (dsp_device->dsp_format != dsp_8bit_unsigned_format)) {
         printf("FATAL: your dsp device does not seem to support unsigned 8 bit (AFMT_8U) format\n");
         exit(1);
