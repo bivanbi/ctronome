@@ -26,11 +26,11 @@ files installed (they come with the Linux kernel source), and OSS
 (or OSS compatible) sound card support.
 
 ### Compile-time Configuration
-Edit [ctronome.h](src/ctronome.h) for defaults, the most important ones are:
+Edit [defaults.c](src/defaults.c) for defaults, the most important ones are:
    ```c
-   static char *metronomewav1 = "/usr/share/ctronome/metronome1.wav\0";
-   static char *metronomewav2 = "/usr/share/ctronome/metronome2.wav\0";
-   static char *dspdev = "/dev/dsp\0";
+   const char *default_wav1_file_path = "/usr/share/ctronome/metronome1.wav\0";
+   const char *default_wav2_file_path = "/usr/share/ctronome/metronome2.wav\0";
+   const char *default_dsp_device_path = "/dev/dsp\0";
    ```
  
 ### Build Binaries

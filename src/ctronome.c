@@ -5,355 +5,404 @@
 #include "ctronome.h"
 #include "routines.h"
 #include "dsp.h"
-
-dword bytes_read;
-
-dword dsp_pattern_length;
-
-/* the two wav files */
-byte wav1[1000000];
-byte wav2[1000000];
-
-dword wav_bytes_to_read;
-
-byte wav_header[100];
-
-const char *wave1, *wave2;
-
-FILE *wavfile, *program;
-
-byte is_program;
-dword bpm_base_length;
-
-dword c1,c2,c3,c4,lo;
-
-word wav_channels;
-dword wav_samplerate;
-word wav_bitspersample;
-word wav2_channels;
-dword wav2_samplerate;
-word wav2_bitspersample;
-
-struct dsp_device dsp_device;
-byte dsp_depth;
-
-int bpt_base_specified,bpm_base_specified;
-int i1,i2,i3,i4,i5;
-byte tmp[8219];
+#include "defaults.h"
 
 byte debug;
 
-int main(int argc,char *argv[]){
- parm_init(argc,argv);
+int main(int argc, char *argv[]) {
+    FILE *program = NULL;
+    byte wav_sample_size_bytes;
+    dword dsp_pattern_length;
+    struct DspDevice dsp_device;
+    struct Arguments args;
+    struct WavData wav1, wav2;
 
- /* create an endless/pcount times loop */
- while(pcount > 0){
-  if (is_program){
-   next_program(program);
-  }
+    args = parse_command_line_arguments(argc, argv);
+    if (args.help_requested) exit_with_help();
+    if (args.version_requested) exit_with_version();
 
-  if (pcount > 0){
-   if (is_program) printf("count: %d, bpm: %d/%d, bpt: %d/%d\n",count,bpm[0],bpm[1],bpt[0],bpt[1]);
+    print_arguments(&args);
 
-   /* lets calculate the appropriate pattern length for our bpm and bpt */
-   bpm_base_length = dsp_device.sample_rate * dsp_depth * dsp_device.number_of_channels * 60 / bpm[0];
-   dsp_pattern_length = bpm_base_length * bpm[1] / bpt[1];
-   /* if (debug){
-    printf("dsp_speed: >%d<, dsp_depth: >%d<, dsp_channels: >%d<, patt. length: >%d<\n",dsp_speed,dsp_depth,dsp_channels,
-                                                                                        dsp_pattern_length);
-   } */
+    dword bpm_base_length;
 
-   while(i3 = dsp_pattern_length % (dsp_depth * dsp_device.number_of_channels)){
-    dsp_pattern_length++;
-   }
+    read_wav_file(&wav1, args.wav1_file_path);
+    read_wav_file(&wav2, args.wav2_file_path);
+    verify_wav_files(&wav1, &wav2);
+    if (args.is_program) program = open_program_file(args.program_file_path);
 
-   for (c4 = 0;c4 < count;c4++){
-    dsp_write(dsp_device.handler,wav1,dsp_pattern_length);
-    for (c3 = bpt[0];c3 > 1; c3--){
-     dsp_write(dsp_device.handler,wav2,dsp_pattern_length);
+    dsp_device = open_sound_device(args.dsp_device_path, &wav1);
+
+    wav_sample_size_bytes = wav1.bits_per_sample / 8;
+
+    if (debug) printf("debug: repeat_count: '%d', finite repetition: '%d'\n", args.repeat_count, args.finite_repetition);
+
+    /* create an endless or finite times loop depending on the value of finite_repetition */
+    while (args.repeat_count > 0) {
+        if (args.is_program) {
+            parse_next_program_line(&args, program);
+        }
+
+        if (args.repeat_count > 0) {
+            if (args.is_program)
+                printf("count: %d, bpm: %d/%d, bpt: %d/%d\n", args.tact_repeat_count, args.beat_per_minute[0], args.beat_per_minute[1],
+                       args.beat_per_tact[0], args.beat_per_tact[1]);
+
+            /* calculate the appropriate pattern length for bpm and bpt */
+            bpm_base_length = dsp_device.sample_rate * wav_sample_size_bytes * dsp_device.number_of_channels * 60 / args.beat_per_minute[0];
+            dsp_pattern_length = bpm_base_length * args.beat_per_minute[1] / args.beat_per_tact[1];
+
+            while (dsp_pattern_length % (wav_sample_size_bytes * dsp_device.number_of_channels)) {
+                dsp_pattern_length++;
+            }
+
+            for (dword tact_repetitions = 0; tact_repetitions < args.tact_repeat_count; tact_repetitions++) {
+                dsp_write(dsp_device.handler, wav1.data, dsp_pattern_length); // accented beat
+                for (dword remaining_beat_count = args.beat_per_tact[0]; remaining_beat_count > 1; remaining_beat_count--) {
+                    dsp_write(dsp_device.handler, wav2.data, dsp_pattern_length);
+                }
+            }
+
+            if (!(args.is_program) && (args.finite_repetition)) {
+                args.repeat_count--;
+                if (debug) printf("debug: Finite repetition, repetitions remaining: %d\n", args.repeat_count);
+            }
+        }
     }
-   }
-   if (!(is_program)) pcount -= pdecrease;
-  }
- }
- dsp_close;
- return(0);
+    dsp_close(dsp_device.handler);
+    return (0);
 }
 
-void next_program(FILE *programfile){
- byte temp[8192];
- dword lo1;
- int lo2,lo3,lo4;
- /* a normal line should be at least 5 characters long + newline */
- lo2 = 0;
- while (lo2 >= 0){
-  while ( (lo1 = getnextline(temp,programfile,8192)) < 6){
-   /* if 0 character has been read, seek to the beginning of the file */
-   if (lo1 < 1){
-    fseek(programfile,SEEK_SET,0);
-    pcount -= pdecrease;
-    if (pcount) printf("repeat\n");
-   }
-  }
-  lo2 = str_search(temp,hashmark);
- }
- count = atoi(temp);
+struct Arguments parse_command_line_arguments(int argc, char *argv[]) {
+    struct Arguments args = get_default_arguments();
 
- lo2 = str_search(temp,space);
- lo2++;
- lo2 += str_search(&temp[lo2],space);
- bpm_base_specified = bpt_base_specified = 0;
+    /* first, get the parameters */
+    int current_argument, slash_position;
 
- if (lo2) {
-  lo3 = str_search(&temp[++lo2],slash);
-  bpt[0] = atoi(&temp[lo2]);
+    debug = 0;
 
-  if (lo3 >= 0){
-   bpt[1] = atoi(&temp[lo2] + ++lo3);
-   bpt_base_specified = 1;
-  }
- }
+    for (current_argument = 1; current_argument < argc; current_argument++) {
+        /* debug */
+        if ((strcmp(argv[current_argument], "-debug") == 0) ||
+            (strcmp(argv[current_argument], "--debug") == 0)) {
+            printf("debug mode\n");
+            debug = 1;
+        }
+    }
 
- lo2 = str_search(temp,space);
- if (lo2) {
-  lo3 = str_search(&temp[++lo2],slash);
-  bpm[0] = atoi(&temp[lo2]);
-  if (debug) printf("debug: prg: bpm0: '%d', lo3: '%d'\n",bpm[0],lo3);
-  if (lo3 >= 0){
-   bpm[1] = atoi(&temp[lo2] + ++lo3);
-   bpm_base_specified = 1;
-  }
- }
+    for (current_argument = 1; current_argument < argc; current_argument++) {
+        /* help */
+        if ((strcmp(argv[current_argument], "-h") == 0) ||
+            (strcmp(argv[current_argument], "--h") == 0) ||
+            (strcmp(argv[current_argument], "-help") == 0) ||
+            (strcmp(argv[current_argument], "--help") == 0)) {
+            args.help_requested = 1;
+        }
 
- /* some parameter post-processing */
- if (!(bpt_base_specified)){
-  if (bpm_base_specified){
-   bpt[1] = bpm[1];
-  } else {
-   bpt[1] = default_base_note;
-  }
- }
+        /* version */
+        if ((strcmp(argv[current_argument], "-v") == 0) ||
+            (strcmp(argv[current_argument], "--v") == 0) ||
+            (strcmp(argv[current_argument], "-version") == 0) ||
+            (strcmp(argv[current_argument], "--version") == 0)) {
+            args.version_requested = 1;
+        }
 
- if (!(bpm_base_specified)){
-  if (bpt_base_specified){
-   bpm[1] = bpt[1];
-  } else {
-   bpm[1] = default_base_note;
-  }
- }
+        /* wav1 */
+        if ((strcmp(argv[current_argument], "-w1") == 0) && (current_argument + 1 < argc)) {
+            args.wav1_file_path = argv[++current_argument];
+            if (debug) printf("debug: wav1: '%s'\n", args.wav1_file_path);
+        }
 
- if (bpt[0] < 1) bpt[0] = 1; if (bpt[0] > 50) bpt[0] = 50;
- if (bpt[1] < 1) bpt[1] = 1; if (bpt[1] > 50) bpt[1] = 50;
+        /* wav2 */
+        if ((strcmp(argv[current_argument], "-w2") == 0) && (current_argument + 1 < argc)) {
+            args.wav2_file_path = argv[++current_argument];
+            if (debug) printf("debug: wav2: '%s'\n", args.wav2_file_path);
+        }
 
- if (bpm[0] > 250) bpm[0] = 250; if (bpm[0] < 30) bpm[0] = 30;
- if (bpm[1] > 20) bpm[1] = 20; if (bpm[1] < 1) bpm[1] = 1;
+        /* dsp device */
+        if ((strcmp(argv[current_argument], "-d") == 0) && (current_argument + 1 < argc)) {
+            args.dsp_device_path = argv[++current_argument];
+            if (debug) printf("debug: dsp: '%s'\n", args.dsp_device_path);
+        }
+
+        /* bpt */
+        if ((strcmp(argv[current_argument], "-t") == 0) && (current_argument + 1 < argc)) {
+            slash_position = search_character_in_buffer(argv[++current_argument], slash);
+            args.beat_per_tact[0] = atoi(argv[current_argument]);
+            if (slash_position >= 0) {
+                args.beat_per_tact[1] = atoi(argv[current_argument] + ++slash_position);
+                args.bpt_base_specified = 1;
+            }
+            if (debug) printf("debug: bpt: '%d'/'%d'\n", args.beat_per_tact[0], args.beat_per_tact[1]);
+        }
+
+        /* bpm */
+        if ((strcmp(argv[current_argument], "-b") == 0) && (current_argument + 1 < argc)) {
+            slash_position = search_character_in_buffer(argv[++current_argument], slash);
+            args.beat_per_minute[0] = atoi(argv[current_argument]);
+            if (slash_position >= 0) {
+                args.beat_per_minute[1] = atoi(argv[current_argument] + ++slash_position);
+                args.bpm_base_specified = 1;
+            }
+            if (debug) printf("debug: bpm: '%d'/'%d'\n", args.beat_per_minute[0], args.beat_per_minute[1]);
+        }
+
+        /* repetition count */
+        if ((strcmp(argv[current_argument], "-c") == 0) && (current_argument + 1 < argc)) {
+            args.repeat_count = atoi(argv[++current_argument]);
+            args.finite_repetition = 1;
+            if (debug) printf("debug: count: '%d', finite repetition: '%d'\n", args.repeat_count, args.finite_repetition);
+        }
+
+        /* program file */
+        if ((strcmp(argv[current_argument], "-p") == 0) && (current_argument + 1 < argc)) {
+            args.program_file_path = argv[++current_argument];
+            args.is_program = 1;
+            if (debug) printf("debug: program: '%s'\n", args.program_file_path);
+        }
+    }
+
+    apply_base_note_defaults(&args);
+    apply_beat_per_minute_limits(&args);
+    apply_beat_per_tact_limits(&args);
+
+    return args;
 }
 
+struct Arguments get_default_arguments() {
+    struct Arguments args;
+    args.wav1_file_path = (char *) default_wav1_file_path;
+    args.wav2_file_path = (char *) default_wav2_file_path;
+    args.dsp_device_path = (char *) default_dsp_device_path;
+    args.is_program = 0;
+    args.finite_repetition = 0; // by default, loop endlessly
+    args.repeat_count = 1;
+    args.tact_repeat_count = 1;
+    args.help_requested = 0;
+    args.version_requested = 0;
+    args.bpm_base_specified = 0;
+    args.bpt_base_specified = 0;
 
-void parm_init(int argc,char *argv[]){
+    memcpy(&args.beat_per_minute, &default_beat_per_minute, sizeof(default_beat_per_minute));
+    memcpy(&args.beat_per_tact, &default_beat_per_tact, sizeof(default_beat_per_tact));
 
- /* first, get the parameters */
- int i;
- dword bytes_read;
-
- debug = 0;
- bpm_base_specified = bpt_base_specified = 0;
-
- for (i = 1; i < argc; i++){
-  /* debug */
-  if ((strcmp(argv[i], "-debug") == 0) ||
-      (strcmp(argv[i], "--debug") == 0)) {
-   printf("debug mode\n");
-   debug = 1;
-  }
- }
-
- for (i = 1; i < argc; i++){
-  /* help */
-  if ((strcmp(argv[i], "-h") == 0) ||
-      (strcmp(argv[i], "--h") == 0) ||
-      (strcmp(argv[i], "-help") == 0) ||
-      (strcmp(argv[i], "--help") == 0)) {
-   printf(HELP);
-   exit(0);
-  }
-
-  /* version */
-  if ((strcmp(argv[i], "-v") == 0) ||
-      (strcmp(argv[i], "--v") == 0) ||
-      (strcmp(argv[i], "-version") == 0) ||
-      (strcmp(argv[i], "--version") == 0)) {
-   printf("%s %s\n",MYNAME,VERSION);
-   exit(0);
-  }
-
-  /* wav1 */
-  if ((strcmp(argv[i], "-w1") == 0) && (i + 1 < argc)){
-   metronomewav1 = argv[++i];
-   if (debug) printf("debug: wav1: '%s'\n",metronomewav1);
-  }
-
-  /* wav2 */
-  if ((strcmp(argv[i], "-w2") == 0) && (i + 1 < argc)){
-   metronomewav2 = argv[++i];
-   if (debug) printf("debug: wav2: '%s'\n",metronomewav2);
-  }
-
-  /* dsp device */
-  if ((strcmp(argv[i], "-d") == 0) && (i + 1 < argc)){
-   dspdev = argv[++i];
-   if (debug) printf("debug: dsp: '%s'\n",dspdev);
-  }
-
-  /* bpt */
-  if ( (strcmp(argv[i], "-t") == 0) && (i + 1 < argc)){
-   i1 = str_search(argv[++i],slash);
-   bpt[0] = atoi(argv[i]);
-   if (i1 >= 0){
-    bpt[1] = atoi(argv[i] + ++i1);
-    bpt_base_specified = 1;
-   }
-   if (debug) printf("debug: bpt: '%d'/'%d'\n",bpt[0],bpt[1]);
-  }
-
-  /* bpm */
-  if ((strcmp(argv[i], "-b") == 0) && (i + 1 < argc)){
-   i2 = str_search(argv[++i],slash);
-   bpm[0] = atoi(argv[i]);
-   if (i2 >= 0){
-    bpm[1] = atoi(argv[i] + ++i2);
-    bpm_base_specified = 1;
-   }
-   if (debug) printf("debug: bpm: '%d'/'%d'\n",bpm[0],bpm[1]);
-  }
-
-  /* pcount */
-  if ((strcmp(argv[i], "-c") == 0) && (i + 1 < argc)){
-   pcount = atoi(argv[++i]);
-   pdecrease = 1;
-   if (debug) printf("debug: count: '%d'\n",pcount);
-  }
-
-  /* program file */
-  if ((strcmp(argv[i], "-p") == 0) && (i + 1 < argc)){
-   programfile = argv[++i];
-   is_program = 1;
-   if (debug) printf("debug: program: '%s'\n",programfile);
-  }
- }
-
- /* some parameter post-processing */
- if (!(bpt_base_specified)){
-  if (bpm_base_specified){
-   bpt[1] = bpm[1];
-  } else {
-   bpt[1] = default_base_note;
-  }
- }
-
- if (!(bpm_base_specified)){
-  if (bpt_base_specified){
-   bpm[1] = bpt[1];
-  } else {
-   bpm[1] = default_base_note;
-  }
- }
-
- if (bpm[0] > 250) bpm[0] = 250; if (bpm[0] < 30) bpm[0] = 30;
- if (bpm[1] > 20) bpm[1] = 20; if (bpm[1] < 1) bpm[1] = 1;
-
- if (bpt[0] < 1) bpt[0] = 1; if (bpt[0] > 50) bpt[0] = 50;
- if (bpt[1] < 1) bpt[1] = 1; if (bpt[1] > 50) bpt[1] = 50;
-
- /* cleanup buffers */
- for (c1 = 0; c1 < 1000000; c1++){
-  wav1[c1] = 0;
-  wav2[c1] = 0;
- }
-
- /* open wav file 1 */
- wavfile = openread(metronomewav1);
-
- /* read the header first */
- bytes_read = fread(&wav_header,1,44,wavfile);
- if (bytes_read < 44){
-  printf("wav file %s too short\n",metronomewav1);
-  exit(1);
- }
-
- wav_channels = * (word *) &wav_header[22];
- wav_samplerate = * (dword *) &wav_header[24];
- wav_bitspersample = * (word *) &wav_header[34];
-
- if (debug)
-  printf("debug: wav channels: '%d', samplerate: '%d', bits per sample: '%d'\n",wav_channels,wav_samplerate,wav_bitspersample);
-
- if (debug) printf("debug: calling dsp_init(%s)\n",dspdev);
-
- dsp_device = dsp_init(dspdev,wav_bitspersample,wav_channels,wav_samplerate);
-
- if (debug)
-  printf("debug: dsp channels: '%d', samplerate: '%d', bits per sample: '%d'\n",
-         dsp_device.number_of_channels, dsp_device.sample_rate, dsp_device.dsp_format);
-
- dsp_depth = dsp_device.dsp_format / 8;
-
- wav_bytes_to_read = dsp_depth * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
- if (debug) printf("debug: maximum wav bytes to read: '%d'\n",wav_bytes_to_read);
-
- bytes_read = fread(&wav1,1,wav_bytes_to_read,wavfile);
- if (debug) printf("debug: wav1 bytes read: '%d'\n",bytes_read);
- if (bytes_read < 10){
-  printf("wav file %s too short\n",metronomewav1);
-  exit(1);
- }
-
- fclose(wavfile);
-
- /* open wav file 2 */
- wavfile = openread(metronomewav2);
-
- /* read the header first */
- bytes_read = fread(&wav_header,1,44,wavfile);
- if (bytes_read < 44){
-  printf("wav file %s too short\n",metronomewav2);
-  exit(1);
- }
-
- wav2_channels = * (word *) &wav_header[22];
- wav2_samplerate = * (dword *) &wav_header[24];
- wav2_bitspersample = * (word *) &wav_header[34];
-
- if (debug)
-  printf("debug: wav2 channels: '%d', samplerate: '%d', bits per sample: '%d'\n",wav2_channels,wav2_samplerate,wav2_bitspersample);
-
- if ((wav_channels != wav2_channels) ||
-     (wav_bitspersample != wav2_bitspersample)){
-  printf("the two WAV files must have the same number of channels and same samplerate\n");
-  exit(1);
- }
-
- if ((debug) && (wav_samplerate != wav2_samplerate)){
-  printf("debug: wav1 and wav2 samplerate differs, may sound funny\n");
- }
-
- /* skip the wav header */
- /* fseek(wavfile,44,SEEK_SET); */
-
- bytes_read = fread(&wav2,1,wav_bytes_to_read,wavfile);
- if (debug) printf("debug: wav2 bytes read: '%d'\n",bytes_read);
- if (bytes_read < 10){
-  printf("wav file %s too short\n",metronomewav2);
-  exit(1);
- }
- fclose(wavfile);
-
- /* open wav file 2 */
- if (is_program) program = openread(programfile);
-
- printf ("bpm: %d/%d, bpt: %d/%d",bpm[0],bpm[1],bpt[0],bpt[1]);
- if (pdecrease) printf ("repeat count: %d",pcount);
- if (is_program) printf ("\nprogram file: %s",programfile);
- printf ("\n");
+    return args;
 }
 
+void apply_base_note_defaults(struct Arguments *args) {
+    if (!(args->bpt_base_specified)) {
+        if (args->bpm_base_specified) {
+            args->beat_per_tact[1] = args->beat_per_minute[1];
+        } else {
+            args->beat_per_tact[1] = default_base_note;
+        }
+    }
+
+    if (!(args->bpm_base_specified)) {
+        if (args->bpt_base_specified) {
+            args->beat_per_minute[1] = args->beat_per_tact[1];
+        } else {
+            args->beat_per_minute[1] = default_base_note;
+        }
+    }
+}
+
+void apply_beat_per_minute_limits(struct Arguments *args) {
+    if (args->beat_per_minute[0] < MINIMUM_BEAT_PER_MINUTE) {
+        printf("warning: beat per minute too low: '%d', setting to minimum: '%d'\n", args->beat_per_minute[0], MINIMUM_BEAT_PER_MINUTE);
+        args->beat_per_minute[0] = MINIMUM_BEAT_PER_MINUTE;
+    }
+
+    if (args->beat_per_minute[0] > MAXIMUM_BEAT_PER_MINUTE) {
+        printf("warning: beat per minute too high: '%d', setting to maximum: '%d'\n", args->beat_per_minute[0], MAXIMUM_BEAT_PER_MINUTE);
+        args->beat_per_minute[0] = MAXIMUM_BEAT_PER_MINUTE;
+    }
+
+    if (args->beat_per_minute[1] < BPM_MINIMUM_BASE_NOTE) {
+        printf("warning: beat per minute base note too low: '%d', setting to minimum: '%d'\n", args->beat_per_minute[1], BPM_MINIMUM_BASE_NOTE);
+        args->beat_per_minute[1] = BPM_MINIMUM_BASE_NOTE;
+    }
+
+    if (args->beat_per_minute[1] > BPM_MAXIMUM_BASE_NOTE) {
+        printf("warning: beat per minute base note too high: '%d', setting to maximum: '%d'\n", args->beat_per_minute[1], BPM_MAXIMUM_BASE_NOTE);
+        args->beat_per_minute[1] = BPM_MAXIMUM_BASE_NOTE;
+    }
+}
+
+void apply_beat_per_tact_limits(struct Arguments *args) {
+    if (args->beat_per_tact[0] < MINIMUM_BEAT_PER_TACT) {
+        printf("warning: beat per tact too low: '%d', setting to minimum: '%d'\n", args->beat_per_tact[0], MINIMUM_BEAT_PER_TACT);
+        args->beat_per_tact[0] = MINIMUM_BEAT_PER_TACT;
+    }
+
+    if (args->beat_per_tact[0] > MAXIMUM_BEAT_PER_TACT) {
+        printf("warning: beat per tact too high: '%d', setting to maximum: '%d'\n", args->beat_per_tact[0], MAXIMUM_BEAT_PER_TACT);
+        args->beat_per_tact[0] = MAXIMUM_BEAT_PER_TACT;
+    }
+
+    if (args->beat_per_tact[1] < BPT_MINIMUM_BASE_NOTE) {
+        printf("warning: beat per tact base note too low: '%d', setting to minimum: '%d'\n", args->beat_per_tact[1], BPT_MINIMUM_BASE_NOTE);
+        args->beat_per_tact[1] = BPT_MINIMUM_BASE_NOTE;
+    }
+
+    if (args->beat_per_tact[1] > BPT_MAXIMUM_BASE_NOTE) {
+        printf("warning: beat per tact base note too high: '%d', setting to maximum: '%d'\n", args->beat_per_tact[1], BPT_MAXIMUM_BASE_NOTE);
+        args->beat_per_tact[1] = BPT_MAXIMUM_BASE_NOTE;
+    }
+}
+
+void exit_with_help() {
+    printf(HELP);
+    exit(0);
+}
+
+void exit_with_version() {
+    printf("%s %s\n", MY_NAME, VERSION);
+    exit(0);
+}
+
+void print_arguments(struct Arguments *args) {
+    printf("bpm: %d/%d, bpt: %d/%d", args->beat_per_minute[0], args->beat_per_minute[1],
+           args->beat_per_tact[0], args->beat_per_tact[1]);
+    if (args->finite_repetition) {
+        printf(", repeat count: %d", args->repeat_count);
+    } else {
+        printf(", repeat count: infinite");
+    }
+
+    if (args->is_program) {
+        printf(", program file: %s", args->program_file_path);
+    } else {
+        printf(", no program file set");
+    }
+    printf("\n");
+}
+
+/**
+ * Process the next line of the program file; restart from beginning if reached the end.
+ *
+ * @param program the file handle to the program file
+ */
+void parse_next_program_line(struct Arguments *args, FILE *program) {
+    char program_read_buffer[8192];
+    dword number_of_bytes_read;
+    int position_in_current_line;
+    int hashmark_position = 0;
+    int slash_position;
+    /* a normal line should be at least 5 characters long + newline */
+    int minimum_line_length = 6;
+
+    args->bpm_base_specified = 0;
+    args->bpt_base_specified = 0;
+
+    /* Skip any line containing a hashmark */
+    while (hashmark_position >= 0) {
+        while ((number_of_bytes_read = get_next_line(program_read_buffer, program, 8192)) < minimum_line_length) {
+            /* if 0 character has been read, seek to the beginning of the file */
+            if (number_of_bytes_read < 1) {
+                fseek(program, SEEK_SET, 0);
+                if (args->finite_repetition) args->repeat_count--;
+                if (args->repeat_count) printf("repeat\n");
+            }
+        }
+        hashmark_position = search_character_in_buffer(program_read_buffer, hashmark);
+    }
+    // read number of repetitions for the tact described in current line
+    args->tact_repeat_count = atoi(program_read_buffer);
+
+    position_in_current_line = search_character_in_buffer(program_read_buffer, space);
+    if (position_in_current_line) {
+        slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
+        args->beat_per_minute[0] = atoi(&program_read_buffer[position_in_current_line]);
+        if (debug)
+            printf("debug: program line: bpm: '%d/%d', bpt: '%d/%d', slash position: %d\n",
+                   args->beat_per_minute[0], args->beat_per_minute[1], args->beat_per_tact[0], args->beat_per_tact[1], slash_position);
+        if (slash_position >= 0) {
+            args->beat_per_minute[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
+            args->bpm_base_specified = 1;
+        }
+    }
+
+    position_in_current_line += search_character_in_buffer(&program_read_buffer[position_in_current_line], space);
+    if (position_in_current_line) {
+        slash_position = search_character_in_buffer(&program_read_buffer[++position_in_current_line], slash);
+        args->beat_per_tact[0] = atoi(&program_read_buffer[position_in_current_line]);
+
+        if (slash_position >= 0) {
+            args->beat_per_tact[1] = atoi(&program_read_buffer[position_in_current_line] + ++slash_position);
+            args->bpt_base_specified = 1;
+        }
+    }
+
+    apply_base_note_defaults(args);
+    apply_beat_per_minute_limits(args);
+    apply_beat_per_tact_limits(args);
+}
+
+void read_wav_file(struct WavData *wav, char *wav_file_path) {
+    FILE *wav_file;
+    dword bytes_read;
+    byte wav_header[100];
+
+    /* cleanup buffer */
+    for (dword buffer_position = 0; buffer_position < MAXIMUM_WAV_DATA_SIZE_BYTES; buffer_position++) {
+        wav->data[buffer_position] = 0;
+    }
+
+    /* open wav file */
+    if (debug) printf("debug: Opening WAV file at '%s'\n", wav_file_path);
+    wav_file = open_file_for_reading(wav_file_path);
+
+    /* read the header first */
+    bytes_read = fread(&wav_header, 1, 44, wav_file);
+    if (bytes_read < 44) {
+        printf("wav file %s too short\n", wav_file_path);
+        exit(1);
+    }
+
+    wav->number_of_channels = *(word *) &wav_header[22];
+    wav->sample_rate = *(dword *) &wav_header[24];
+    wav->bits_per_sample = *(word *) &wav_header[34];
+
+    if (debug)
+        printf("debug: '%s': channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
+               wav_file_path, wav->number_of_channels, wav->sample_rate, wav->bits_per_sample);
+
+    if (debug) printf("debug: '%s': maximum bytes to read: '%d'\n", wav_file_path, MAXIMUM_WAV_DATA_SIZE_BYTES);
+    bytes_read = fread(&wav->data, 1, MAXIMUM_WAV_DATA_SIZE_BYTES, wav_file);
+    if (debug) printf("debug: '%s': bytes read: '%d'\n", wav_file_path, bytes_read);
+    if (bytes_read < 10) {
+        printf("ERROR: '%s': file too short\n", wav_file_path);
+        exit(1);
+    }
+
+    fclose(wav_file);
+}
+
+void verify_wav_files(struct WavData *wav1, struct WavData *wav2) {
+    if ((wav1->number_of_channels != wav2->number_of_channels) ||
+        (wav1->bits_per_sample != wav2->bits_per_sample)) {
+        printf("ERROR: the two WAV files must have the same number of channels and bits per sample\n");
+        exit(1);
+    }
+
+    if (wav1->sample_rate != wav2->sample_rate) {
+        printf("warning: wav1 and wav2 sample rate differs, may sound funny\n");
+    }
+}
+
+FILE *open_program_file(char *program_file_path) {
+    if (debug) printf("debug: opening program file: '%s'\n", program_file_path);
+    return open_file_for_reading(program_file_path);
+}
+
+struct DspDevice open_sound_device(char *dsp_device_path, struct WavData *wav) {
+    if (debug) printf("debug: calling dsp_init(%s)\n", dsp_device_path);
+
+    struct DspDevice dsp_device = dsp_init(dsp_device_path, wav->bits_per_sample, wav->number_of_channels, wav->sample_rate);
+
+    if (debug)
+        printf("debug: dsp channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
+               dsp_device.number_of_channels, dsp_device.sample_rate, dsp_device.dsp_format);
+
+    return dsp_device;
+}
