@@ -14,9 +14,10 @@ int main(int argc, char *argv[]) {
     byte wav_sample_size_bytes;
     dword dsp_pattern_length;
     struct DspDevice dsp_device;
-    struct Arguments args = parse_command_line_arguments(argc, argv);
+    struct Arguments args;
     struct WavData wav1, wav2;
 
+    args = parse_command_line_arguments(argc, argv);
     if (args.help_requested) exit_with_help();
     if (args.version_requested) exit_with_version();
 
