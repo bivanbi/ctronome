@@ -44,11 +44,25 @@ static const char slash = 47; /* the / character */
 static const char hashmark = 35; /* the # character */
 static const char space = 32; /* the   character */
 
+struct WavData {
+    byte data[MAXIMUM_WAV_DATA_SIZE_BYTES];
+    word number_of_channels;
+    dword sample_rate;
+    word bits_per_sample;
+};
+
 void set_default_values();
 
 void parse_next_program_line(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);
-dword get_wav_maximum_number_of_bytes_to_read();
+
+void read_wav_file(struct WavData *, char *);
+
+void verify_wav_files();
+
+void open_program_file();
+
+void open_sound_device();
 
 extern byte debug;
 

@@ -9,18 +9,7 @@
 
 dword dsp_pattern_length;
 
-struct WavData {
-    byte data[MAXIMUM_WAV_DATA_SIZE_BYTES];
-    word number_of_channels;
-    dword sample_rate;
-    word bits_per_sample;
-};
-
 struct WavData wav1, wav2;
-
-dword wav_number_of_bytes_to_read;
-
-byte wav_header[100];
 
 char *wav1_file_path;
 char *wav2_file_path;
@@ -49,6 +38,14 @@ byte debug;
 int main(int argc, char *argv[]) {
     set_default_values();
     parse_command_line_arguments(argc, argv);
+    read_wav_file(&wav1, wav1_file_path);
+    read_wav_file(&wav2, wav2_file_path);
+    verify_wav_files();
+    open_program_file();
+    open_sound_device();
+
+    wav_sample_size_bytes = wav1.bits_per_sample / 8;
+
     if (debug) printf("debug: repeat_count: '%d', finite repetition: '%d'\n", repeat_count, finite_repetition);
 
 
@@ -186,8 +183,6 @@ void parse_command_line_arguments(int argc, char *argv[]) {
 
     /* first, get the parameters */
     int current_argument, slash_position;
-    dword bytes_read;
-    FILE *wav_file;
 
     debug = 0;
     bpm_base_specified = bpt_base_specified = 0;
@@ -302,31 +297,72 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     if (beat_per_tact[1] < 1) beat_per_tact[1] = 1;
     if (beat_per_tact[1] > 50) beat_per_tact[1] = 50;
 
-    /* cleanup buffers */
-    for (dword buffer_position = 0; buffer_position < 1000000; buffer_position++) {
-        wav1.data[buffer_position] = 0;
-        wav2.data[buffer_position] = 0;
+    printf("bpm: %d/%d, bpt: %d/%d", beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1]);
+    if (finite_repetition) printf(", repeat count: %d", repeat_count);
+    if (is_program) printf("\nprogram file: %s", program_file_path);
+    printf("\n");
+}
+
+void read_wav_file(struct WavData *wav, char *wav_file_path) {
+    FILE *wav_file;
+    dword bytes_read;
+    byte wav_header[100];
+
+    /* cleanup buffer */
+    for (dword buffer_position = 0; buffer_position < MAXIMUM_WAV_DATA_SIZE_BYTES; buffer_position++) {
+        wav->data[buffer_position] = 0;
     }
 
-    /* open wav file 1 */
-    if (debug) printf("debug: Opening wav1 at '%s'\n", wav1_file_path);
-    wav_file = open_file_for_reading(wav1_file_path);
+    /* open wav file */
+    if (debug) printf("debug: Opening WAV file at '%s'\n", wav_file_path);
+    wav_file = open_file_for_reading(wav_file_path);
 
     /* read the header first */
     bytes_read = fread(&wav_header, 1, 44, wav_file);
     if (bytes_read < 44) {
-        printf("wav file %s too short\n", wav1_file_path);
+        printf("wav file %s too short\n", wav_file_path);
         exit(1);
     }
 
-    wav1.number_of_channels = *(word *) &wav_header[22];
-    wav1.sample_rate = *(dword *) &wav_header[24];
-    wav1.bits_per_sample = *(word *) &wav_header[34];
+    wav->number_of_channels = *(word *) &wav_header[22];
+    wav->sample_rate = *(dword *) &wav_header[24];
+    wav->bits_per_sample = *(word *) &wav_header[34];
 
     if (debug)
-        printf("debug: wav1 channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
-               wav1.number_of_channels, wav1.sample_rate, wav1.bits_per_sample);
+        printf("debug: '%s': channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
+               wav_file_path, wav->number_of_channels, wav->sample_rate, wav->bits_per_sample);
 
+    if (debug) printf("debug: '%s': maximum bytes to read: '%d'\n", wav_file_path, MAXIMUM_WAV_DATA_SIZE_BYTES);
+    bytes_read = fread(&wav->data, 1, MAXIMUM_WAV_DATA_SIZE_BYTES, wav_file);
+    if (debug) printf("debug: '%s': bytes read: '%d'\n", wav_file_path, bytes_read);
+    if (bytes_read < 10) {
+        printf("ERROR: '%s': file too short\n", wav_file_path);
+        exit(1);
+    }
+
+    fclose(wav_file);
+}
+
+void verify_wav_files() {
+    if ((wav1.number_of_channels != wav2.number_of_channels) ||
+        (wav1.bits_per_sample != wav2.bits_per_sample)) {
+        printf("ERROR: the two WAV files must have the same number of channels and bits per sample\n");
+        exit(1);
+    }
+
+    if (wav1.sample_rate != wav2.sample_rate) {
+        printf("warning: wav1 and wav2 sample rate differs, may sound funny\n");
+    }
+}
+
+void open_program_file() {
+    if (is_program) {
+        if (debug) printf("debug: opening program file: '%s'\n", program_file_path);
+        program = open_file_for_reading(program_file_path);
+    }
+}
+
+void open_sound_device() {
     if (debug) printf("debug: calling dsp_init(%s)\n", dsp_device_path);
 
     dsp_device = dsp_init(dsp_device_path, wav1.bits_per_sample, wav1.number_of_channels, wav1.sample_rate);
@@ -334,88 +370,4 @@ void parse_command_line_arguments(int argc, char *argv[]) {
     if (debug)
         printf("debug: dsp channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
                dsp_device.number_of_channels, dsp_device.sample_rate, dsp_device.dsp_format);
-
-    wav_sample_size_bytes = wav1.bits_per_sample / 8;
-
-    wav_number_of_bytes_to_read = get_wav_maximum_number_of_bytes_to_read();
-
-    bytes_read = fread(&wav1.data, 1, wav_number_of_bytes_to_read, wav_file);
-    if (debug) printf("debug: wav1 bytes read: '%d'\n", bytes_read);
-    if (bytes_read < 10) {
-        printf("wav file %s too short\n", wav1_file_path);
-        exit(1);
-    }
-
-    fclose(wav_file);
-
-    /* open wav file 2 */
-    if (debug) printf("debug: Opening wav2 at '%s'\n", wav1_file_path);
-    wav_file = open_file_for_reading(wav2_file_path);
-
-    /* read the header first */
-    bytes_read = fread(&wav_header, 1, 44, wav_file);
-    if (bytes_read < 44) {
-        printf("wav file %s too short\n", wav2_file_path);
-        exit(1);
-    }
-
-    wav2.number_of_channels = *(word *) &wav_header[22];
-    wav2.sample_rate = *(dword *) &wav_header[24];
-    wav2.bits_per_sample = *(word *) &wav_header[34];
-
-    if (debug)
-        printf("debug: wav2 channels: '%d', sample rate: '%d', bits per sample: '%d'\n",
-               wav2.number_of_channels, wav2.sample_rate, wav2.bits_per_sample);
-
-    if ((wav1.number_of_channels != wav2.number_of_channels) ||
-        (wav1.bits_per_sample != wav2.bits_per_sample)) {
-        printf("the two WAV files must have the same number of channels and bits per sample\n");
-        exit(1);
-    }
-
-    if ((debug) && (wav1.sample_rate != wav2.sample_rate)) {
-        printf("debug: wav1 and wav2 sample rate differs, may sound funny\n");
-    }
-
-    bytes_read = fread(&wav2.data, 1, wav_number_of_bytes_to_read, wav_file);
-    if (debug) printf("debug: wav2 bytes read: '%d'\n", bytes_read);
-    if (bytes_read < 10) {
-        printf("wav file %s too short\n", wav2_file_path);
-        exit(1);
-    }
-    fclose(wav_file);
-
-    /* open program file */
-    if (is_program) {
-        if (debug) printf("debug: opening program file: '%s'\n", program_file_path);
-        program = open_file_for_reading(program_file_path);
-    }
-
-    printf("bpm: %d/%d, bpt: %d/%d", beat_per_minute[0], beat_per_minute[1], beat_per_tact[0], beat_per_tact[1]);
-    if (finite_repetition) printf(", repeat count: %d", repeat_count);
-    if (is_program) printf("\nprogram file: %s", program_file_path);
-    printf("\n");
-}
-
-/**
- * Calculate the maximum number of bytes to read from the wav file to have 0.5 seconds of sound.
- * Any longer metronome sample would not make much sense.
- *
- * @return maximum number of bytes to read, capped at MAXIMUM_WAV_DATA_SIZE_BYTES for safety
- */
-dword get_wav_maximum_number_of_bytes_to_read() {
-    if (debug)
-        printf("debug: wav sample size bytes: %d, number of channels: %d, sample rate: %d\n",
-               wav_sample_size_bytes, dsp_device.number_of_channels, dsp_device.sample_rate);
-    int maximum_number_of_bytes_to_read = wav_sample_size_bytes * dsp_device.number_of_channels * dsp_device.sample_rate / 2;
-
-    if (maximum_number_of_bytes_to_read > MAXIMUM_WAV_DATA_SIZE_BYTES) {
-        printf("WARN: calculated wav_number_of_bytes_to_read '%d' would overstep MAXIMUM_WAV_DATA_SIZE_BYTES '%d', might be a bug\n",
-               maximum_number_of_bytes_to_read, MAXIMUM_WAV_DATA_SIZE_BYTES);
-        maximum_number_of_bytes_to_read = MAXIMUM_WAV_DATA_SIZE_BYTES;
-    }
-
-    if (debug) printf("debug: maximum wav bytes to read: '%d'\n", maximum_number_of_bytes_to_read);
-
-    return maximum_number_of_bytes_to_read;
 }
