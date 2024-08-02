@@ -46,7 +46,7 @@ static const char space = 32; /* the   character */
 
 void set_default_values();
 
-void parse_next_program_line(FILE *programfile); /* process the next line of program */
+void parse_next_program_line(FILE *); /* process the next line of program */
 void parse_command_line_arguments(int, char *[]);
 dword get_wav_maximum_number_of_bytes_to_read();
 

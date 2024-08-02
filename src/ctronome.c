@@ -100,9 +100,9 @@ void set_default_values() {
 /**
  * Process the next line of the program file; restart from beginning if reached the end.
  *
- * @param programfile the file handle to the program file
+ * @param program the file handle to the program file
  */
-void parse_next_program_line(FILE *programfile) {
+void parse_next_program_line(FILE *program) {
     char program_read_buffer[8192];
     dword number_of_bytes_read;
     int position_in_current_line;
@@ -113,10 +113,10 @@ void parse_next_program_line(FILE *programfile) {
 
     /* Skip any line containing a hashmark */
     while (hashmark_position >= 0) {
-        while ((number_of_bytes_read = get_next_line(program_read_buffer, programfile, 8192)) < minimum_line_length) {
+        while ((number_of_bytes_read = get_next_line(program_read_buffer, program, 8192)) < minimum_line_length) {
             /* if 0 character has been read, seek to the beginning of the file */
             if (number_of_bytes_read < 1) {
-                fseek(programfile, SEEK_SET, 0);
+                fseek(program, SEEK_SET, 0);
                 if (finite_repetition) repeat_count--;
                 if (repeat_count) printf("repeat\n");
             }
