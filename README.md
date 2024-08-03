@@ -25,6 +25,13 @@ on virtually all Linuxes. You need to have Linux kernel header
 files installed (they come with the Linux kernel source), and OSS
 (or OSS compatible) sound card support.
 
+#### CMake
+Build ctronome requires [CMake 3.10](https://cmake.org/getting-started/) or later.
+On Ubuntu or Debian, you can install it with:
+```bash
+sudo apt-get install cmake
+```
+
 ### Compile-time Configuration
 Edit [defaults.c](src/defaults.c) for defaults, the most important ones are:
    ```c
@@ -34,11 +41,13 @@ Edit [defaults.c](src/defaults.c) for defaults, the most important ones are:
    ```
  
 ### Build Binaries
-Go into ctronome [source](src) directory and issue:
+Go into ctronome repository root directory and issue:
 ```bash
-make all
+cmake .
+cmake --build .
 ```
-A [single binary](src/ctronome) will be compiled.
+
+A [single binary](build/ctronome) will be compiled into the `build` directory.
 
 ### Install Binary and wav files
 Ctronome is a single binary. You can put it anywhere you want in
