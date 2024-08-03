@@ -1,4 +1,17 @@
 # Ctronome Changelog
+## Latest Versions
+Since moving to GitHub, the changelog is now maintained in the git commit logs, so this changelog
+file will not be updated anymore.
+
+### GitHub
+Go to [Ctronome GitHub Repository](https://github.com/bivanbi/ctronome) -> [Releases](https://github.com/bivanbi/ctronome/releases)
+
+### Git Log
+Example: to display changes between v0.5.6 and v0.5.7, go to git repository folder and issue:
+```bash
+git log v0.5.6..v0.5.7
+```
+
 ## v0.5.7
 - Move codebase to GitHub
 - fix compilation error 'multiple definition of ...'
