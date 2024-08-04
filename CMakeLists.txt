@@ -33,3 +33,17 @@ add_custom_target(git_version
 
 add_dependencies(ctronome git_version)
 # end of Git versioning
+
+# Install target
+message (STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+# For ctronome binary will know where to look for the assets
+add_compile_definitions(ASSETS_INSTALL_DIR="${CMAKE_INSTALL_PREFIX}/share/ctronome/assets")
+
+# Install the executable
+install(TARGETS ctronome
+        RUNTIME DESTINATION bin
+)
+
+install(DIRECTORY assets
+        DESTINATION share/ctronome)
+# end of Install target

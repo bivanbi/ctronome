@@ -171,9 +171,9 @@ struct Arguments parse_command_line_arguments(int argc, char *argv[]) {
 
 struct Arguments get_default_arguments() {
     struct Arguments args;
-    args.wav1_file_path = (char *) default_wav1_file_path;
-    args.wav2_file_path = (char *) default_wav2_file_path;
     args.dsp_device_path = (char *) default_dsp_device_path;
+    args.wav1_file_path = WAV1_DEFAULT_FILE_PATH;
+    args.wav2_file_path = WAV2_DEFAULT_FILE_PATH;
     args.is_program = 0;
     args.finite_repetition = 0; // by default, loop endlessly
     args.repeat_count = 1;

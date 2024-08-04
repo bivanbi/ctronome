@@ -19,57 +19,62 @@ provide OSS compatibility.*
 
 
 ## Installation
-### Dependencies
-Only the very basic C libraries are needed that I believe to exist
-on virtually all Linuxes. You need to have Linux kernel header
-files installed (they come with the Linux kernel source), and OSS
-(or OSS compatible) sound card support.
+### Required Tools
+- C compiler (gcc, clang, etc.)
+- CMake 3.19 or later
+- Git (required at compile time to get the version number from Git repo)
 
-#### CMake
-Build ctronome requires [CMake 3.10](https://cmake.org/getting-started/) or later.
-On Ubuntu or Debian, you can install it with:
+### Dependencies
+- Linux Kernel with OSS* support
+
+**OSS support can be provided with other tools such as PulseAudio OSS emulator*
+
+### TL;DR: Example Build and Installation Into Default Location
 ```bash
-sudo apt-get install cmake
+git clone https://github.com/bivanbi/ctronome.git
+cd ctronome
+cmake --preset default
+cmake --build --preset default
+sudo cmake --install build
 ```
 
-### Compile-time Configuration
-Edit [defaults.c](src/defaults.c) for defaults, the most important ones are:
-   ```c
-   const char *default_wav1_file_path = "/usr/share/ctronome/metronome1.wav\0";
-   const char *default_wav2_file_path = "/usr/share/ctronome/metronome2.wav\0";
-   const char *default_dsp_device_path = "/dev/dsp\0";
-   ```
+### Configure CMake project
+Configure build for the default installation prefix of `/usr/local`:
+```bash
+cmake --preset default
+```
+
+To override the installation prefix, either edit [CMakePresets.json](CMakePresets.json),
+or specify it on the command line, for example:
+```bash
+cmake --preset default -DCMAKE_INSTALL_PREFIX=/opt
+```
+
+*The reason it needs to be configured before compiling, is because the ctronome binary needs to know where
+the WAV files will be installed.*
  
 ### Build Binaries
-Go into ctronome repository root directory and issue:
 ```bash
-cmake .
-cmake --build .
+cmake --build --preset default
 ```
 
 A [single binary](build/bin/ctronome) will be compiled into the `build/bin` directory.
 
-### Install Binary and wav files
-Ctronome is a single binary. You can put it anywhere you want in
-your local or remote filesystem. You need two, preferably short
-WAV files as metronome sample - one for accented beats -, 
-put in the place you specified in [ctronome.h](src/ctronome.h), or specified on the command line.
+### Install files
+Binary will be installed in `<installation prefix>/bin`, WAV files will be installed into `<installation prefix>/share/ctronome`.
+Default installation prefix is `/usr/local`. See [Confiure CMake project](#configure-cmake-project) to change the installation prefix.
 
-There are [two sets of wav samples](assets) included, recorded from a real metronome;
-one for mono and one stereo output. You have to install the one that fits your sound
-system (see [important notes](docs/important_notes.md)).
-
-### Example compilation and installation into default location
 ```bash
-git clone https://github.com/bivanbi/ctronome.git
-cd ctronome/src/
-make all
-
-# Usually root permission is needed to install into default installation
-sudo cp ctronome /usr/local/bin
-sudo mkdir /usr/share/ctronome
-sudo cp ../assets/*wav /usr/share/ctronome/
+cmake --install build
 ```
+
+Notes:
+- Root privileges may be required to install files into the default installation prefix. Use sudo if necessary, e.g.: `sudo cmake --install build`
+- At the time of writing this document, CMake v3.22 did not support the `--preset` option for the `install` command.
+Hence, the default build directory `build` is specified instead.
+- Overriding the installation prefix with the `--prefix` option causes `ctronome` and its WAV files to be installed
+into a location where `ctronome` will not be able to find them. In this case, wav file locations need to be
+specified when running `ctronome` with the `-w1` and `-w2` options.
 
 ## Using Ctronome
 ### BPM and BPT Explanation
