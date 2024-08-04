@@ -1,7 +1,2 @@
 .idea/
 build
-
-# CMake generated files
-CMakeFiles
-CMakeCache.txt
-Makefile

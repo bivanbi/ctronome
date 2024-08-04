@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)  # Specify the minimum CMake version
+cmake_minimum_required(VERSION 3.19)  # Specify the minimum CMake version
 project(ctronome C) # Specify the project name and the language
 
 # Add source files
@@ -18,7 +18,7 @@ include_directories(
 add_executable(ctronome ${SOURCES})
 
 set_target_properties(ctronome PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
 
 # Git versioning
@@ -33,3 +33,17 @@ add_custom_target(git_version
 
 add_dependencies(ctronome git_version)
 # end of Git versioning
+
+# Install target
+message (STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+# For ctronome binary will know where to look for the assets
+add_compile_definitions(ASSETS_INSTALL_DIR="${CMAKE_INSTALL_PREFIX}/share/ctronome/assets")
+
+# Install the executable
+install(TARGETS ctronome
+        RUNTIME DESTINATION bin
+)
+
+install(DIRECTORY assets
+        DESTINATION share/ctronome)
+# end of Install target
