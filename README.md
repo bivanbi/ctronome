@@ -47,7 +47,7 @@ cmake .
 cmake --build .
 ```
 
-A [single binary](build/ctronome) will be compiled into the `build` directory.
+A [single binary](build/bin/ctronome) will be compiled into the `build/bin` directory.
 
 ### Install Binary and wav files
 Ctronome is a single binary. You can put it anywhere you want in
