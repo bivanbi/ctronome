@@ -76,6 +76,19 @@ Hence, the default build directory `build` is specified instead.
 into a location where `ctronome` will not be able to find them. In this case, wav file locations need to be
 specified when running `ctronome` with the `-w1` and `-w2` options.
 
+### Uninstall
+Simply remove the following files / directories:
+```bash
+sudo rm -rfv <installation prefix>/bin/ctronome <installation prefix>/share/ctronome
+```
+
+Where `<installation prefix>` is the installation prefix used during the installation.
+
+Example removal from default installation prefix of `/usr/local`:
+```bash
+sudo rm -rfv /usr/local/bin/ctronome /usr/local/share/ctronome
+```
+
 ## Using Ctronome
 ### BPM and BPT Explanation
 For BPM, you can specify the base note. E.g. 60/4 means:
