@@ -117,7 +117,8 @@ ctronome -b 60/4 -t 7/7
 ```
 
 *If the base note for BPM is not specified, it defaults to the base note
-of the tact.*
+of the tact and vica verse. If neither BPM nor BPT base note is set, it defaults to `DEFAULT_BASE_NOTE` set
+in [defaults.h](src/defaults.h)*
 
 ### Programmed Metronome
 
