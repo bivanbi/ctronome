@@ -7,6 +7,7 @@ set(SOURCES
         src/defaults.c
         src/dsp.c
         src/routines.c
+        src/logging_adapter.c
 )
 
 include_directories(

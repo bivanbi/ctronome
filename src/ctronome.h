@@ -106,6 +106,4 @@ FILE *open_program_file(char *);
 
 struct DspDevice open_sound_device(char *, struct WavData *);
 
-extern byte debug;
-
 #endif //CTRONOME_H

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "ctronome.h"
 #include "routines.h"
+#include "logging_adapter.h"
 
 /**
  * Search fora particular byte value in a null-terminated haystack, and return the position of the first match.
@@ -26,7 +27,7 @@ dword get_next_line(char *buffer, FILE *file, dword max) {
            (length < max));
 
     if (length == max) {
-        printf("line buffer overflow\n");
+        log_message(LEVEL_WARNING, "get_next_line: line buffer overflow\n");
         return (0);
     }
 
@@ -38,7 +39,7 @@ FILE *open_file_for_reading(char *file_path) {
     FILE *file;
 
     if (!(file = fopen(file_path, "rb"))) {
-        printf("cannot open file for reading '%s'\n", file_path);
+        log_message(LEVEL_ERROR, "cannot open file for reading '%s'\n", file_path);
         exit(1);
     }
 
