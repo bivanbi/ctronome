@@ -12,6 +12,10 @@ void set_log_level(int level) {
 void log_message(int level, const char *format, ...) {
     va_list args;
     va_start(args, format);
+    if (level > log_level) {
+        return;
+    }
+
     switch (level) {
         case LEVEL_FATAL:
             fprintf(stderr, "FATAL: ");
