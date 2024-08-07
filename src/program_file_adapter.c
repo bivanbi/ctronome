@@ -70,7 +70,6 @@ struct ProgramLine parse_next_program_line(struct ProgramFile *program_file) {
             log_message(LEVEL_DEBUG, "parse_next_program_line: line %d: not enough space separated values for a valid program line, skip\n",
                         program_file->current_line_number);
             continue;
-        }
 
         // Parse tact count
         program_line.tact_repeat_count = atoi(program_line_read_buffer);
@@ -81,6 +80,10 @@ struct ProgramLine parse_next_program_line(struct ProgramFile *program_file) {
             log_message(LEVEL_WARNING, "parse_next_program_line: line %d: tact repeat count must be an integer larger than 0\n",
                         program_file->current_line_number);
             continue;
+        } else if ((space_positions.character_count == PROGRAM_LINE_ELEMENT_COUNT) && (last_valid_position > space_positions.positions[PROGRAM_LINE_ELEMENT_COUNT - 1])) {
+            last_valid_position = space_positions.positions[PROGRAM_LINE_ELEMENT_COUNT - 1] - 1;
+            log_message(LEVEL_DEBUG, "parse_next_program_line: line %d: have excess spaces, adjusted last_valid_position to %d\n",
+                        program_file->current_line_number, last_valid_position);
         }
 
         // Parse beat per minute
