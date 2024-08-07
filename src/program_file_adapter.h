@@ -44,4 +44,16 @@ struct CharacterPositions get_space_positions_in_buffer(char *, int);
 
 void close_program_file(struct ProgramFile *);
 
+void assert_program_file_contains_valid_line(struct ProgramFile *, struct ProgramLine *);
+
+int parse_tact_count(char *, struct ProgramFile *, struct ProgramLine *);
+
+int parse_beat_per_minute(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
+
+int parse_bpm_base_note(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
+
+int parse_beat_per_tact(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
+
+int parse_bpt_base_note(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *, int);
+
 #endif //CTRONOME_PROGRAM_FILE_ADAPTER_H
