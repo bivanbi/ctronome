@@ -18,6 +18,23 @@ int search_character_in_buffer(char *haystack, char needle) {
     return (-1);
 }
 
+/**
+ * Search for a particular byte value in a haystack, and return the position of the first match.
+ * Limit search to a range of positions, between and including start and end position.
+ *
+ * @param haystack the buffer to search in
+ * @param needle the value to look for
+ * @param start begin search at this position
+ * @param end end search at this position
+ * @return
+ */
+int search_character_in_range(char *haystack, char needle, int start, int end) {
+    for (int position = start; position <= end; position++) {
+        if (haystack[position] == needle) return (position);
+    }
+    return (-1);
+}
+
 dword get_next_line(char *buffer, FILE *file, dword max) {
     dword length;
     length = 0;
@@ -44,4 +61,8 @@ FILE *open_file_for_reading(char *file_path) {
     }
 
     return (file);
+}
+
+dword min_dword(dword a, dword b) {
+    return (a < b) ? a : b;
 }

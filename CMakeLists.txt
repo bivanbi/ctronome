@@ -1,14 +1,7 @@
 cmake_minimum_required(VERSION 3.19)  # Specify the minimum CMake version
 project(ctronome C) # Specify the project name and the language
 
-# Add source files
-set(SOURCES
-        src/ctronome.c
-        src/defaults.c
-        src/dsp.c
-        src/routines.c
-        src/logging_adapter.c
-)
+file(GLOB SOURCES "src/*.c")
 
 include_directories(
         src

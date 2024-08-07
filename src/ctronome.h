@@ -4,6 +4,7 @@
 #include <sys/soundcard.h>
 #include <stdint.h>
 #include "defaults.h"
+#include "program_file_adapter.h"
 
 #define MY_NAME "ctronome"
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
@@ -51,10 +52,6 @@ typedef DWORD dword;
 typedef WORD word;
 typedef BYTE byte;
 
-static const char slash = 47; /* the / character */
-static const char hashmark = 35; /* the # character */
-static const char space = 32; /* the   character */
-
 struct WavData {
     byte data[MAXIMUM_WAV_DATA_SIZE_BYTES];
     word number_of_channels;
@@ -70,12 +67,13 @@ struct Arguments {
     byte help_requested;
     byte version_requested;
     byte is_program;
+    dword current_program_line;
     int beat_per_minute[2];
     int beat_per_tact[2];
     byte bpm_base_specified;
     byte bpt_base_specified;
-    int repeat_count;
-    int tact_repeat_count; // used in programs to set tact repetition times for each program line
+    dword repeat_count;
+    dword tact_repeat_count; // used in programs to set tact repetition times for each program line
     int finite_repetition;
 };
 
@@ -96,14 +94,18 @@ void apply_beat_per_minute_limits(struct Arguments *);
 
 void apply_beat_per_tact_limits(struct Arguments *);
 
-void parse_next_program_line(struct Arguments *, FILE *); /* process the next line of program */
+void apply_program_line(struct Arguments *, struct ProgramLine *);
 
 void read_wav_file(struct WavData *, char *);
 
 void verify_wav_files(struct WavData *, struct WavData *);
 
-FILE *open_program_file(char *);
-
 struct DspDevice open_sound_device(char *, struct WavData *);
+
+void output_tact(struct DspDevice *dsp_device, struct WavData *wav1, struct WavData *wav2, struct Arguments *args);
+
+void play_program(struct DspDevice *, struct WavData *, struct WavData *, struct Arguments *);
+
+void play_simple_tact(struct DspDevice *dsp_device, struct WavData *wav1, struct WavData *wav2, struct Arguments *args);
 
 #endif //CTRONOME_H
