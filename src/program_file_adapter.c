@@ -113,7 +113,6 @@ struct CharacterPositions get_space_positions_in_buffer(char *buffer, int last_v
     log_message(LEVEL_DEBUG, "get_space_positions_in_buffer: last valid position: %d\n", last_valid_position);
 
     for (int i = 0; i <= last_valid_position; i++) {
-        log_message(LEVEL_DEBUG, "get_space_positions_in_buffer: looking for space at %d\n", i);
         if (buffer[i] == space) {
             log_message(LEVEL_DEBUG, "get_space_positions_in_buffer: space found at position %d\n", i);
             space_positions.positions[space_positions.character_count++] = i;
