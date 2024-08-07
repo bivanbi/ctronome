@@ -16,6 +16,10 @@ struct ProgramFile open_program_file(char *filename) {
 
 struct ProgramLine parse_next_program_line(struct ProgramFile *program_file) {
     struct ProgramLine program_line;
+    program_line.beat_per_minute[0] = 0;
+    program_line.beat_per_minute[1] = 0;
+    program_line.beat_per_tact[0] = 0;
+    program_line.beat_per_tact[1] = 0;
     program_line.bpm_base_specified = 0;
     program_line.bpt_base_specified = 0;
     program_line.is_program_end_reached = 0;
