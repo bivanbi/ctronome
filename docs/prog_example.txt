@@ -1,20 +1,23 @@
 # example program for ctronome. You can play it back:
 # ctronome -p prog_example.txt
 #
-# ctronome will skip lines shorter than 5 characters and lines containing
-# the '#' character, so please do not put remarks in the same line
-# with count/bpm/bpt definition
-#
-# fields are separated by space
+# fields are separated by single space
 # fields are:
-# tact_count bpm bpt
+# <tact count> <bpm> <bpt>
 
-1 60/4 5/4
-3 60/4 6/9
+# base note can be omitted for both tact and bpt, in which case it will default to DEFAULT_BASE_NOTE (see src/defaults.h)
+1 60 4 # means: 1 60/<DEFAULT_BASE_NOTE> 4/<DEFAULT_BASE_NOTE>
 
-4 60/4 7/8
+# if base note is omitted to either bpm or bpt, it will default to the one specified
+1 60/4 4 # means: 1 60/4 4/4
+1 60 4/5 # means: 1 60/5 4/5
+
+1 60/4 4/4 # repeat tact once, 60 bpm, 1/4 base note, five beats per tact
+2 60/4 4/8 # the tact base note length is calculated proportional to BPM; so int this example, the length of 1/8 note is half of 1/4 as specified by BPM
+
+4 60/4 7/9 # some more interesting rhythmic pattern
 1 70/4 4/4
 
-2 60/5 5/4
+3 60/5 5/4
 2 60/7 5/4
 
