@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "defaults.h"
 #include "program_file_adapter.h"
+#include "audio_output_adapter.h"
 
 #define MY_NAME "ctronome"
 #define HOMEPAGE "https://github.com/bivanbi/ctronome\n"
@@ -44,7 +45,7 @@ Home page: " HOMEPAGE "\n"
 #define BPT_MINIMUM_BASE_NOTE 1
 #define BPT_MAXIMUM_BASE_NOTE 50
 
-/* my lazy type definitions */
+/* my lazy driver definitions */
 typedef uint32_t DWORD;
 typedef uint16_t WORD;
 typedef uint8_t BYTE;
@@ -88,6 +89,8 @@ void exit_with_version();
 
 void print_arguments(struct Arguments *);
 
+struct AudioOutputSettings get_audio_settings(struct Arguments *, struct WavData *);
+
 void apply_base_note_defaults(struct Arguments *);
 
 void apply_beat_per_minute_limits(struct Arguments *);
@@ -100,12 +103,10 @@ void read_wav_file(struct WavData *, char *);
 
 void verify_wav_files(struct WavData *, struct WavData *);
 
-struct DspDevice open_sound_device(char *, struct WavData *);
+void output_tact(struct AudioOutputDevice *, struct WavData *, struct WavData *, struct Arguments *);
 
-void output_tact(struct DspDevice *dsp_device, struct WavData *wav1, struct WavData *wav2, struct Arguments *args);
+void play_program(struct AudioOutputDevice *, struct WavData *, struct WavData *, struct Arguments *);
 
-void play_program(struct DspDevice *, struct WavData *, struct WavData *, struct Arguments *);
-
-void play_simple_tact(struct DspDevice *dsp_device, struct WavData *wav1, struct WavData *wav2, struct Arguments *args);
+void play_simple_tact(struct AudioOutputDevice *, struct WavData *, struct WavData *, struct Arguments *);
 
 #endif //CTRONOME_H
