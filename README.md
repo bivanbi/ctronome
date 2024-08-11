@@ -8,15 +8,13 @@ DOES TO YOUR PC. BACKUP FREQUENTLY.
 
 ## Introduction
 Ctronome is a very-very simple programmable metronome for Linux console,
-with /dev/dsp (OSS) audio output. BPM ranges from 30 to 250, tacts like 3/4, 7/8
-etc. are possible. It plays external WAV files, so one could use custom
-sound samples.
+with /dev/dsp (OSS) and PulseAudio output support*.
+BPM ranges from 30 to 250, tacts like 3/4, 7/8 etc. are possible.
+It plays external WAV files, so one could use custom sound samples.
 
 Aim is to keep it as simple as it can be with the least dependencies.
 
-*Note: Non-OSS sound systems need additional utils/libraries to 
-provide OSS compatibility.*
-
+*Note: Other sound systems might provide utilities for OSS compatiblity.*
 
 ## Installation
 ### Required Tools
@@ -26,6 +24,7 @@ provide OSS compatibility.*
 
 ### Dependencies
 - Linux Kernel with OSS* support
+- For PulseAudio support: libpulse-dev package (header files)
 
 **OSS support can be provided with other tools such as PulseAudio OSS emulator*
 
@@ -108,6 +107,7 @@ For BPT you can also define the base note. E.g. 4/4 means:
                          default: /usr/share/ctronome/metronome1.wav
     -w2 <filename>      wav to use for other beat of tact
                          default: /usr/share/ctronome/metronome2.wav
+    -o <driver>         audio output driver, drivers: dsp, pulseaudio, default: autodetect
     -d <device>         dsp device, default /dev/dsp
     -h                  display help screen
     -debug              display debug messages
@@ -146,14 +146,12 @@ the result will be unpredictable. Debug mode will tell you the details.
 
 
 ## Running on Non-OSS Sound Systems
-On modern Linux distributions it is not very likely that native OSS is used.
-In this case the following error is displayed when running ctronome:
-```bash
-FATAL: cannot open dsp device /dev/dsp
-/dev/dsp: No such file or directory
-```
+Currently supported sound systems are OSS and PulseAudio.
+OSS support can be provided through compatibility utilities.
 
 ### PulseAudio
+*Note: PulseAudio is now natively supported if Ctronome is compiled with it.*
+
 PulseAudio has an OSS compatibility module that can be installed to provide
 OSS support. For example on Ubuntu systems, the package is called `pulseaudio-utils`.
 ```bash
