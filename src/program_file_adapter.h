@@ -8,11 +8,6 @@ typedef BYTE byte;
 typedef uint32_t DWORD;
 typedef DWORD dword;
 
-static const char slash = 47; /* the / character */
-static const char hashmark = 35; /* the # character */
-static const char space = 32; /* the   character */
-static const char newline = 10; /* the newline character */
-
 struct ProgramFile {
     FILE *handle;
     dword current_line_number;

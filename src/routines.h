@@ -1,5 +1,6 @@
 #ifndef CTRONOME_ROUTINES_H
 #define CTRONOME_ROUTINES_H
+#include <stdio.h>
 
 typedef uint32_t DWORD;
 typedef DWORD dword;

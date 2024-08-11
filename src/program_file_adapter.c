@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "defaults.h"
 #include "program_file_adapter.h"
 #include "routines.h"
 #include "logging_adapter.h"
