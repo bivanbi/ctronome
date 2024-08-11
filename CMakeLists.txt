@@ -27,6 +27,14 @@ if (HAVE_SOUNDCARD_H)
     list(APPEND SOURCES src/audio_adapters/dsp_adapter.c)
 endif ()
 
+check_include_file(pulse/simple.h HAVE_PULSEAUDIO_SIMPLE_H)
+if (HAVE_PULSEAUDIO_SIMPLE_H)
+    add_definitions(-DHAVE_PULSEAUDIO_SIMPLE_H)
+    list(APPEND SOURCES src/audio_adapters/pulseaudio_adapter.c)
+
+    link_libraries(pulse-simple pulse)
+endif ()
+
 # End of Discover supported audio systems
 
 # Install target

@@ -17,8 +17,13 @@ typedef BYTE byte;
 
 #endif
 
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+#include "audio_adapters/pulseaudio_adapter.h"
+#endif
+
 enum AudioOutputDriver {
     AUDIO_OUTPUT_TYPE_DSP,
+    AUDIO_OUTPUT_TYPE_PULSEAUDIO,
     NUMBER_OF_AUDIO_OUTPUT_TYPES
 };
 
@@ -45,11 +50,16 @@ struct AudioOutputDevice {
 #ifdef HAVE_SOUNDCARD_H
     struct DspDevice dsp_device;
 #endif
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+    struct PulseAudioDevice pulseaudio_device;
+#endif
 };
 
 int is_audio_output_driver_available(enum AudioOutputDriver);
 
 int is_dsp_output_driver_available();
+
+int is_pulseaudio_output_driver_available();
 
 int open_audio_output_device(struct AudioOutputDevice *);
 
@@ -58,9 +68,11 @@ int open_specific_audio_output_device(struct AudioOutputDevice *);
 int open_automatically_selected_audio_output_device(struct AudioOutputDevice *device);
 
 #ifdef HAVE_SOUNDCARD_H
+int open_dsp_device_for_playback(struct AudioOutputDevice *);
+#endif
 
-int open_dsp_device(struct AudioOutputDevice *);
-
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+int open_pulseaudio_device_for_playback(struct AudioOutputDevice *);
 #endif
 
 int output_to_audio_device(struct AudioOutputDevice *, byte *, dword);

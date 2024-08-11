@@ -5,10 +5,17 @@
 
 #include "audio_adapters/dsp_adapter.h"
 
-#endif
+#endif // HAVE_SOUNDCARD_H
+
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+
+#include "audio_adapters/pulseaudio_adapter.h"
+
+#endif // HAVE_PULSEAUDIO_SIMPLE_H
 
 const char *AudioOutputTypeNames[NUMBER_OF_AUDIO_OUTPUT_TYPES] = {
         "dsp",
+        "pulseaudio"
 };
 
 int open_audio_output_device(struct AudioOutputDevice *device) {
@@ -23,11 +30,23 @@ int open_audio_output_device(struct AudioOutputDevice *device) {
 
 int open_automatically_selected_audio_output_device(struct AudioOutputDevice *device) {
     log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_automatically_selected_audio_output_device\n");
-
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+    if ((is_pulseaudio_output_driver_available() == EXIT_SUCCESS) && (open_pulseaudio_device_for_playback(device) == EXIT_SUCCESS)) {
+        log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_automatically_selected_audio_output_device: pulseaudio opened successfully\n");
+        device->settings->driver = AUDIO_OUTPUT_TYPE_PULSEAUDIO;
+        return EXIT_SUCCESS;
+    } else {
+        log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_automatically_selected_audio_output_device: pulseaudio not available\n");
+    }
+#endif
 #ifdef HAVE_SOUNDCARD_H
-    device->dsp_device.path = device->settings->dsp_device_path;
-    return dsp_init(&device->dsp_device, device->settings->bits_per_sample,
-                    device->settings->number_of_channels, device->settings->sample_rate);
+    if ((is_dsp_output_driver_available() == EXIT_SUCCESS) && (open_dsp_device_for_playback(device) == EXIT_SUCCESS)) {
+        log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_automatically_selected_audio_output_device: dsp opened successfully\n");
+        device->settings->driver = AUDIO_OUTPUT_TYPE_DSP;
+        return EXIT_SUCCESS;
+    } else {
+        log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_automatically_selected_audio_output_device: dsp not available\n");
+    }
 #endif
 
     log_message(LEVEL_ERROR, "audio_output_adapter.c: open_automatically_selected_audio_output_device: no supported / functioning audio output driver found\n");
@@ -45,12 +64,14 @@ int open_specific_audio_output_device(struct AudioOutputDevice *device) {
     }
 
     switch (device->settings->driver) {
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+        case AUDIO_OUTPUT_TYPE_PULSEAUDIO:
+            return open_pulseaudio_device_for_playback(device);
+#endif // HAVE_PULSEAUDIO_SIMPLE_H
 #ifdef HAVE_SOUNDCARD_H
         case AUDIO_OUTPUT_TYPE_DSP:
-            device->dsp_device.path = device->settings->dsp_device_path;
-            return dsp_init(&device->dsp_device, device->settings->bits_per_sample,
-                            device->settings->number_of_channels, device->settings->sample_rate);
-#endif
+            return open_dsp_device_for_playback(device);
+#endif // HAVE_SOUNDCARD_H
         default:
             log_message(LEVEL_ERROR, "audio_output_adapter.c: open_specific_audio_output_device: unsupported audio output driver %d\n",
                         device->settings->driver);
@@ -59,12 +80,18 @@ int open_specific_audio_output_device(struct AudioOutputDevice *device) {
 }
 
 int output_to_audio_device(struct AudioOutputDevice *device, byte *audio_data, dword number_of_bytes) {
-    log_message(LEVEL_DEBUG, "audio_output_adapter.c: output_to_audio_device: %d bytes\n", number_of_bytes);
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: output_to_audio_device: %s (%d): %d bytes\n",
+                AudioOutputTypeNames[device->settings->driver], device->settings->driver, number_of_bytes);
+
     switch (device->settings->driver) {
 #ifdef HAVE_SOUNDCARD_H
         case AUDIO_OUTPUT_TYPE_DSP:
             return dsp_write(&device->dsp_device, audio_data, number_of_bytes);
-#endif
+#endif // HAVE_SOUNDCARD_H
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+        case AUDIO_OUTPUT_TYPE_PULSEAUDIO:
+            return pulseaudio_write(&device->pulseaudio_device, audio_data, number_of_bytes);
+#endif // HAVE_PULSEAUDIO_SIMPLE_H
         default:
             log_message(LEVEL_ERROR, "audio_output_adapter.c: output_to_audio_device: unsupported audio output driver %d\n",
                         device->settings->driver);
@@ -78,7 +105,11 @@ int close_audio_output_device(struct AudioOutputDevice *device) {
 #ifdef HAVE_SOUNDCARD_H
         case AUDIO_OUTPUT_TYPE_DSP:
             return dsp_close(&device->dsp_device);
-#endif
+#endif // HAVE_SOUNDCARD_H
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+        case AUDIO_OUTPUT_TYPE_PULSEAUDIO:
+            return pulseaudio_close(&device->pulseaudio_device);
+#endif // HAVE_PULSEAUDIO_SIMPLE_H
         default:
             log_message(LEVEL_ERROR, "audio_output_adapter.c: close_audio_device: unsupported audio output driver %d\n",
                         device->settings->driver);
@@ -97,10 +128,10 @@ const char *get_audio_output_name(enum AudioOutputDriver type) {
 int is_audio_output_driver_available(enum AudioOutputDriver type) {
     log_message(LEVEL_DEBUG, "audio_output_adapter.c: is_audio_output_driver_available: driver %d\n", type);
     switch (type) {
-#ifdef HAVE_SOUNDCARD_H
         case AUDIO_OUTPUT_TYPE_DSP:
             return is_dsp_output_driver_available();
-#endif
+        case AUDIO_OUTPUT_TYPE_PULSEAUDIO:
+            return is_pulseaudio_output_driver_available();
         default:
             return EXIT_FAILURE;
     }
@@ -109,11 +140,44 @@ int is_audio_output_driver_available(enum AudioOutputDriver type) {
 #ifdef HAVE_SOUNDCARD_H
 
 int is_dsp_output_driver_available() {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: is_dsp_output_driver_available: true\n");
     return EXIT_SUCCESS;
+}
+
+int open_dsp_device_for_playback(struct AudioOutputDevice *device) {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_dsp_device_for_playback\n");
+    device->dsp_device.path = device->settings->dsp_device_path;
+    return dsp_init(&device->dsp_device, device->settings->bits_per_sample,
+                    device->settings->number_of_channels, device->settings->sample_rate);
 }
 
 #else
 int is_dsp_output_driver_available() {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: is_dsp_output_driver_available: false\n");
     return EXIT_FAILURE;
 }
 #endif // HAVE_SOUNDCARD_H
+
+#ifdef HAVE_PULSEAUDIO_SIMPLE_H
+
+int is_pulseaudio_output_driver_available() {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: is_pulseaudio_output_driver_available: true\n");
+    return EXIT_SUCCESS;
+}
+
+int open_pulseaudio_device_for_playback(struct AudioOutputDevice *device) {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_pulseaudio_device_for_playback\n");
+    // word bits_per_sample, word number_of_channels, dword sample_rate
+    return pulseaudio_init(&device->pulseaudio_device, device->settings->bits_per_sample,
+                           device->settings->number_of_channels, device->settings->sample_rate);
+
+}
+
+#else
+
+int is_pulseaudio_output_driver_available() {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: is_pulseaudio_output_driver_available: false\n");
+    return EXIT_FAILURE;
+}
+
+#endif // HAVE_PULSEAUDIO_SIMPLE_H
