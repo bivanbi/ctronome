@@ -24,7 +24,7 @@ git log v0.5.6..v0.5.7
 - Exit after displaying version number
 - Do not display homepage with version number, only version number
 - Update help text for readability and add home page
-- Fix logical expressions in [dsp.c](../src/dsp.c) always evaluating to false
+- Fix logical expressions in [dsp.c](../src/audio_adapters/dsp_adapter.c) always evaluating to false
 - Prevent a possible buffer overflow when loading wav files into memory
 - Reformat and refactor code for readability and better maintainability
 - Resolve compiler warnings (incompatible variable types etc.)
@@ -66,7 +66,7 @@ git log v0.5.6..v0.5.7
   to be ignored
 
 ## v0.4
-- [dsp.c](../src/dsp.c) code cleanup, according to OSS Programmers Guide.
+- [dsp.c](../src/audio_adapters/dsp_adapter.c) code cleanup, according to OSS Programmers Guide.
 - implemented some debug messages, mainly for DSP procedures
 
 ## v0.3

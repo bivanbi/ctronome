@@ -8,11 +8,6 @@ typedef BYTE byte;
 typedef uint32_t DWORD;
 typedef DWORD dword;
 
-static const char slash = 47; /* the / character */
-static const char hashmark = 35; /* the # character */
-static const char space = 32; /* the   character */
-static const char newline = 10; /* the newline character */
-
 struct ProgramFile {
     FILE *handle;
     dword current_line_number;
@@ -40,19 +35,19 @@ struct ProgramFile open_program_file(char *);
 
 struct ProgramLine parse_next_program_line(struct ProgramFile *);
 
-struct CharacterPositions get_space_positions_in_buffer(char *, int);
+struct CharacterPositions get_space_positions_in_buffer(const char *, int);
 
 void close_program_file(struct ProgramFile *);
 
 void assert_program_file_contains_valid_line(struct ProgramFile *, struct ProgramLine *);
 
-int parse_tact_count(char *, struct ProgramFile *, struct ProgramLine *);
+int parse_tact_count(const char *, struct ProgramFile *, struct ProgramLine *);
 
-int parse_beat_per_minute(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
+int parse_beat_per_minute(const char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
 
 int parse_bpm_base_note(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
 
-int parse_beat_per_tact(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
+int parse_beat_per_tact(const char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *);
 
 int parse_bpt_base_note(char *, struct ProgramFile *, struct ProgramLine *, struct CharacterPositions *, int);
 

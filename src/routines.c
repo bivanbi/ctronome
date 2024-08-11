@@ -11,8 +11,8 @@
  * @param needle the value to look for
  * @return First position of the value in the buffer if found, else -1.
  */
-int search_character_in_buffer(char *haystack, char needle) {
-    dword position = 0;
+int search_character_in_buffer(const char *haystack, char needle) {
+    int position = 0;
     while ((haystack[position] != 0) && (haystack[position++] != needle));
     if (haystack[--position] == needle) return (position);
     return (-1);
@@ -28,7 +28,7 @@ int search_character_in_buffer(char *haystack, char needle) {
  * @param end end search at this position
  * @return
  */
-int search_character_in_range(char *haystack, char needle, int start, int end) {
+int search_character_in_range(const char *haystack, char needle, int start, int end) {
     for (int position = start; position <= end; position++) {
         if (haystack[position] == needle) return (position);
     }
@@ -63,6 +63,7 @@ FILE *open_file_for_reading(char *file_path) {
     return (file);
 }
 
-dword min_dword(dword a, dword b) {
-    return (a < b) ? a : b;
+int string_to_decimal_int(const char *string) {
+    char *end_of_number;
+    return (int) strtol(string, &end_of_number, 10);
 }
