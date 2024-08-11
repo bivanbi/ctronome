@@ -137,23 +137,23 @@ void apply_beat_per_tact_limits(struct Arguments *args) {
     }
 }
 
-void output_tact(struct AudioOutputDevice *output_device, struct WavData *wav1, struct WavData *wav2, struct Arguments *args) {
+void output_tact(struct AudioOutputDevice *device, struct WavData *wav1, struct WavData *wav2, struct Arguments *args) {
     int wav_sample_size_bytes = wav1->bits_per_sample / 8;
     dword bpm_base_length;
     dword dsp_pattern_length;
 
     /* calculate the appropriate pattern length for bpm and bpt */
-    bpm_base_length = output_device->settings->sample_rate * wav_sample_size_bytes * output_device->settings->number_of_channels * 60 / args->beat_per_minute[0];
+    bpm_base_length = device->settings->sample_rate * wav_sample_size_bytes * device->settings->number_of_channels * 60 / args->beat_per_minute[0];
     dsp_pattern_length = bpm_base_length * args->beat_per_minute[1] / args->beat_per_tact[1];
 
-    while (dsp_pattern_length % (wav_sample_size_bytes * output_device->settings->number_of_channels)) {
+    while (dsp_pattern_length % (wav_sample_size_bytes * device->settings->number_of_channels)) {
         dsp_pattern_length++;
     }
 
     for (dword tact_repetitions = 0; tact_repetitions < args->tact_repeat_count; tact_repetitions++) {
-        output_to_audio_device(output_device, wav1->data, dsp_pattern_length); // accented beat
+        output_to_audio_device(device, wav1->data, dsp_pattern_length); // accented beat
         for (dword remaining_beat_count = args->beat_per_tact[0]; remaining_beat_count > 1; remaining_beat_count--) {
-            output_to_audio_device(output_device, wav2->data, dsp_pattern_length);
+            output_to_audio_device(device, wav2->data, dsp_pattern_length);
         }
     }
 }
