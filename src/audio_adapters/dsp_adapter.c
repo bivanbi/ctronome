@@ -150,5 +150,5 @@ int dsp_write(struct DspDevice *dsp_device, byte *from, dword count) {
 }
 
 int dsp_close(struct DspDevice *dsp_device) {
-    close(dsp_device->handle);
+    return close(dsp_device->handle);
 }

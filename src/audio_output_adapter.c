@@ -59,7 +59,7 @@ int open_specific_audio_output_device(struct AudioOutputDevice *device) {
 
     if (is_audio_output_driver_available(device->settings->driver) == EXIT_FAILURE) {
         log_message(LEVEL_ERROR, "audio_output_adapter.c: open_specific_audio_output_device: support for %s (%d) is not compiled in. Programming error?\n",
-                    AudioOutputTypeNames[device->settings->driver], device->settings->driver);
+                    get_audio_output_name(device->settings->driver), device->settings->driver);
         exit(EXIT_FAILURE);
     }
 

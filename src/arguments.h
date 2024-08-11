@@ -1,5 +1,6 @@
 #ifndef CTRONOME_ARGUMENTS_H
 #define CTRONOME_ARGUMENTS_H
+
 #include <stdint.h>
 
 /* my lazy driver definitions */

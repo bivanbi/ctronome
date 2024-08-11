@@ -62,3 +62,8 @@ FILE *open_file_for_reading(char *file_path) {
 
     return (file);
 }
+
+int string_to_decimal_int(const char *string) {
+    char *end_of_number;
+    return (int) strtol(string, &end_of_number, 10);
+}

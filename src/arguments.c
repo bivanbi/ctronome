@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdlib.h>
 #include "arguments.h"
 #include "defaults.h"
 #include "logging_adapter.h"
@@ -58,9 +57,9 @@ struct Arguments parse_command_line_arguments(int argc, char *argv[]) {
         /* bpt */
         if ((strcmp(argv[current_argument], "-t") == 0) && (current_argument + 1 < argc)) {
             slash_position = search_character_in_buffer(argv[++current_argument], slash);
-            args.beat_per_tact[0] = atoi(argv[current_argument]);
+            args.beat_per_tact[0] = string_to_decimal_int(argv[current_argument]);
             if (slash_position >= 0) {
-                args.beat_per_tact[1] = atoi(argv[current_argument] + ++slash_position);
+                args.beat_per_tact[1] = string_to_decimal_int(argv[current_argument] + ++slash_position);
                 args.bpt_base_specified = 1;
             }
             log_message(LEVEL_DEBUG, "bpt: '%d'/'%d'\n", args.beat_per_tact[0], args.beat_per_tact[1]);
@@ -69,9 +68,9 @@ struct Arguments parse_command_line_arguments(int argc, char *argv[]) {
         /* bpm */
         if ((strcmp(argv[current_argument], "-b") == 0) && (current_argument + 1 < argc)) {
             slash_position = search_character_in_buffer(argv[++current_argument], slash);
-            args.beat_per_minute[0] = atoi(argv[current_argument]);
+            args.beat_per_minute[0] = string_to_decimal_int(argv[current_argument]);
             if (slash_position >= 0) {
-                args.beat_per_minute[1] = atoi(argv[current_argument] + ++slash_position);
+                args.beat_per_minute[1] = string_to_decimal_int(argv[current_argument] + ++slash_position);
                 args.bpm_base_specified = 1;
             }
             log_message(LEVEL_DEBUG, "bpm: '%d'/'%d'\n", args.beat_per_minute[0], args.beat_per_minute[1]);
@@ -79,7 +78,7 @@ struct Arguments parse_command_line_arguments(int argc, char *argv[]) {
 
         /* repetition count */
         if ((strcmp(argv[current_argument], "-c") == 0) && (current_argument + 1 < argc)) {
-            args.repeat_count = atoi(argv[++current_argument]);
+            args.repeat_count = string_to_decimal_int(argv[++current_argument]);
             args.finite_repetition = 1;
             log_message(LEVEL_DEBUG, "count: '%d', finite repetition: '%d'\n", args.repeat_count, args.finite_repetition);
         }
