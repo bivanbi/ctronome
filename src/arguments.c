@@ -48,6 +48,12 @@ struct Arguments parse_command_line_arguments(int argc, char *argv[]) {
             log_message(LEVEL_DEBUG, "wav2: '%s'\n", args.wav2_file_path);
         }
 
+        /* audio output driver */
+        if ((strcmp(argv[current_argument], "-o") == 0) && (current_argument + 1 < argc)) {
+            args.audio_output_driver = argv[++current_argument];
+            log_message(LEVEL_DEBUG, "audio output driver: '%s'\n", args.audio_output_driver);
+        }
+
         /* dsp device */
         if ((strcmp(argv[current_argument], "-d") == 0) && (current_argument + 1 < argc)) {
             args.dsp_device_path = argv[++current_argument];
@@ -98,6 +104,7 @@ struct Arguments get_default_arguments() {
     struct Arguments args;
     args.wav1_file_path = WAV1_DEFAULT_FILE_PATH;
     args.wav2_file_path = WAV2_DEFAULT_FILE_PATH;
+    args.audio_output_driver = NULL;
     args.dsp_device_path = DSP_DEFAULT_DEVICE_PATH;
     args.is_program = 0;
     args.current_program_line = 0;

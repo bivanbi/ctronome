@@ -45,6 +45,8 @@ void print_arguments(struct Arguments *);
 
 struct AudioOutputSettings get_audio_settings(struct Arguments *, struct WavData *);
 
+void parse_audio_output_driver(struct AudioOutputSettings *, struct Arguments *);
+
 void apply_base_note_defaults(struct Arguments *);
 
 void apply_beat_per_minute_limits(struct Arguments *);

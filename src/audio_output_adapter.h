@@ -21,6 +21,7 @@ typedef BYTE byte;
 #include "audio_adapters/pulseaudio_adapter.h"
 #endif
 
+#define KNOWN_OUTPUT_DRIVER_NAMES_STRING "dsp, pulseaudio"
 enum AudioOutputDriver {
     AUDIO_OUTPUT_TYPE_DSP,
     AUDIO_OUTPUT_TYPE_PULSEAUDIO,
@@ -54,6 +55,8 @@ struct AudioOutputDevice {
     struct PulseAudioDevice pulseaudio_device;
 #endif
 };
+
+int get_audio_output_device_by_name(enum AudioOutputDriver *, const char *);
 
 int is_audio_output_driver_available(enum AudioOutputDriver);
 

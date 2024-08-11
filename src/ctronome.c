@@ -59,12 +59,29 @@ struct Arguments get_arguments(int argc, char *argv[]) {
 struct AudioOutputSettings get_audio_settings(struct Arguments *args, struct WavData *wav) {
     struct AudioOutputSettings audio_settings;
 
-    audio_settings.auto_select_driver = AUTO_SELECT_ENABLED;
+    parse_audio_output_driver(&audio_settings, args);
+
     audio_settings.dsp_device_path = args->dsp_device_path;
     audio_settings.number_of_channels = wav->number_of_channels;
     audio_settings.sample_rate = wav->sample_rate;
     audio_settings.bits_per_sample = wav->bits_per_sample;
     return audio_settings;
+}
+
+void parse_audio_output_driver(struct AudioOutputSettings *settings, struct Arguments *args) {
+    if (args->audio_output_driver == NULL) {
+        settings->auto_select_driver = AUTO_SELECT_ENABLED;
+    } else {
+        if (get_audio_output_device_by_name(&settings->driver, args->audio_output_driver) != EXIT_SUCCESS) {
+            log_message(LEVEL_ERROR, "Unknown audio output driver: '%s'\n", args->audio_output_driver);
+            exit(EXIT_FAILURE);
+        } else if (is_audio_output_driver_available(settings->driver) != EXIT_SUCCESS) {
+            log_message(LEVEL_ERROR, "Audio output driver '%s' support not compiled into this ctronome binary\n",
+                        get_audio_output_name(settings->driver));
+            exit(EXIT_FAILURE);
+        }
+        settings->auto_select_driver = AUTO_SELECT_DISABLED;
+    }
 }
 
 void apply_base_note_defaults(struct Arguments *args) {

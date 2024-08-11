@@ -1,3 +1,4 @@
+#include <string.h>
 #include "audio_output_adapter.h"
 #include "logging_adapter.h"
 
@@ -17,6 +18,18 @@ const char *AudioOutputTypeNames[NUMBER_OF_AUDIO_OUTPUT_TYPES] = {
         "dsp",
         "pulseaudio"
 };
+
+int get_audio_output_device_by_name(enum AudioOutputDriver *driver, const char *name) {
+    log_message(LEVEL_DEBUG, "audio_output_adapter.c: get_audio_output_device_by_name: %s\n", name);
+    for (int i = 0; i < NUMBER_OF_AUDIO_OUTPUT_TYPES; i++) {
+        if (strcmp(name, AudioOutputTypeNames[i]) == 0) {
+            *driver = i;
+            return EXIT_SUCCESS;
+        }
+    }
+
+    return EXIT_FAILURE;
+}
 
 int open_audio_output_device(struct AudioOutputDevice *device) {
     log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_audio_output_device: auto select driver: %d, preferred driver %s (%d)\n",

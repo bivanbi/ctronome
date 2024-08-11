@@ -2,6 +2,7 @@
 #define CTRONOME_ARGUMENTS_H
 
 #include <stdint.h>
+#include "defaults.h"
 
 /* my lazy driver definitions */
 typedef uint32_t DWORD;
@@ -20,9 +21,10 @@ Valid parameters are:\n\
     -t <bpt>            beat per tact\n\
     -p <filename>       program file\n\
     -c <count>          play tact/program <count> times then exit\n\
-    -w1 <filename>      wav to use for first (accented) beat of tact\n\
-    -w2 <filename>      wav to use for other beat of tact\n\
-    -d <device>         dsp device\n\
+    -w1 <filename>      wav to use for first (accented) beat of tact, default: " WAV1_DEFAULT_FILE_PATH "\n\
+    -w2 <filename>      wav to use for other beat of tact, default: " WAV2_DEFAULT_FILE_PATH "\n\
+    -o <driver>         audio output driver, drivers: " KNOWN_OUTPUT_DRIVER_NAMES_STRING ", default: autodetect\n\
+    -d <device>         dsp device path if using dsp driver; default: " DSP_DEFAULT_DEVICE_PATH "\n\
     -h                  display this help screen\n\
     -v                  print version\n\
     -debug              verbose output\n\
@@ -50,6 +52,7 @@ struct Arguments {
     dword repeat_count;
     dword tact_repeat_count; // used in programs to set tact repetition times for each program line
     int finite_repetition;
+    char *audio_output_driver;
 };
 
 struct Arguments parse_command_line_arguments(int, char *[]);
