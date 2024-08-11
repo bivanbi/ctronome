@@ -32,8 +32,6 @@ int get_audio_output_device_by_name(enum AudioOutputDriver *driver, const char *
 }
 
 int open_audio_output_device(struct AudioOutputDevice *device) {
-    log_message(LEVEL_DEBUG, "audio_output_adapter.c: open_audio_output_device: auto select driver: %d, preferred driver %s (%d)\n",
-                device->settings->auto_select_driver, get_audio_output_name(device->settings->driver), device->settings->driver);
     if (device->settings->auto_select_driver == AUTO_SELECT_ENABLED) {
         return open_automatically_selected_audio_output_device(device);
     }
