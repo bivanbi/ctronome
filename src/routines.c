@@ -62,7 +62,3 @@ FILE *open_file_for_reading(char *file_path) {
 
     return (file);
 }
-
-dword min_dword(dword a, dword b) {
-    return (a < b) ? a : b;
-}
